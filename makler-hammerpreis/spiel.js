@@ -11,7 +11,7 @@
 //   #tempo=0.5  Uhren langsamer   #ende=854  Beispiel-Endbild (nichts gespeichert)   #abbruch  Beispiel-Abbruch
 //   #figur=makler|maklerin   #auftrag=N (Tagesauftrag TAG-N)   #ereignis=N (erstes Ereignis EVT-N)   #obj=12 (OBJ-012 als Objekt 1)
 //   #bieter=2  Schalter bieterrundeJedes zum Ausprobieren   #ohneinfo  ohne Zwischenscreens
-//   #infos  Zwischenscreens zurücksetzen (erscheinen wieder wie beim allerersten Spiel)
+//   #infos  Bennos Vorstellung zurücksetzen (Zwischenscreens erscheinen seit v13 ohnehin bei jedem Seitenaufruf)
 //   #schaetzung=0.9  mit #schritt=bieter: Startpreis = 90 % des Marktwerts (sonst 100 %; Auktion steigend/sinkend ausprobieren)
 //   window.HN_TEST: zustand(), schritt() (Trefferflächen, Räume, Regler, Käufer, Gebote), setzen(wert) (Regler)
 (function () {
@@ -36,16 +36,11 @@
   const nr2 = (pre, n) => pre + String(n).padStart(pre === 'OBJ-' ? 3 : 2, '0');
 
   let lauf = null, phase = 'start', B = innerWidth, H = innerHeight, zeit = 0;
-  // Zwischenscreens schon gesehen? (je Gerät, Korrektur MZ 27.10.2026)
-  const INFO_KEY = 'mg:hammerpreis:infos:' + (HB.K.firma || '');
-  const infoSpeicher = (() => {
-    try {
-      if (OPT.infos) localStorage.removeItem(INFO_KEY);
-      const roh = JSON.parse(localStorage.getItem(INFO_KEY) || '[]');
-      localStorage.setItem(INFO_KEY, JSON.stringify(Array.isArray(roh) ? roh : []));   // Probe: Speicher beschreibbar?
-      return { ok: true, liste: Array.isArray(roh) ? roh.filter(n => n >= 1 && n <= 5) : [] };
-    } catch (e) { return { ok: false, liste: [] }; }
-  })();
+  // Zwischenscreens schon gesehen? (v13, MZ 27.10.2026): je Seitenaufruf – neu von der Startseite, direkter Aufruf oder
+  // Neuladen zeigt sie wieder, „Nochmal“ (gleiche Seite) nicht. Die frühere Speicherung je Gerät (v7) entfällt; der alte
+  // Eintrag mg:hammerpreis:infos:<firma> wird beim Laden aufgeräumt.
+  const infoGezeigt = new Set();
+  try { localStorage.removeItem('mg:hammerpreis:infos:' + (HB.K.firma || '')); } catch (e) { /* privat */ }
   // Benno stellt sich vor (MZ, v11): sein allererster Spruch auf dem Gerät ist die Vorstellung (Situation VORSTELLUNG),
   // gemerkt in mg:hammerpreis:benno:<firma> (sobald die Blase wirklich erscheint); ohne Speicher einmal je Durchgang.
   // Testhilfe #infos setzt auch das zurück.
@@ -362,22 +357,16 @@
   // Bieterrunde beim ersten Objekt, in dem sie vorkommen (z. B. wenn Objekt 1 unter Wert verkauft wurde). Die Tafel des
   // Schritts steht schon dahinter; Uhr und Bieterrunde laufen erst nach „Verstanden“ (def.schritt hält an, solange eine
   // Einblendung offen ist). Testhilfe #ohneinfo schaltet sie ab.
-  // Korrektur MZ (27.10.2026): nur beim allerersten Spiel auf dem Gerät – je Schritt gemerkt (mg:hammerpreis:infos:<firma>,
-  // Liste der gesehenen Schritte; gemerkt bei „Verstanden“). Ein Schritt, der im ersten Spiel nicht vorkam (Käufer/Bieterrunde
-  // nach Unter Wert/Ladenhüter), zeigt seinen Screen beim ersten späteren Vorkommen. Ohne Speicher (privat, gesperrt):
-  // wie bisher einmal je Durchgang. Testhilfe #infos setzt zurück.
-  function infoGesehen(nr) { return infoSpeicher.ok ? infoSpeicher.liste.includes(nr) : !!(lauf && lauf.info[nr]); }
-  function infoMerken(nr) {
-    if (!infoSpeicher.ok || infoSpeicher.liste.includes(nr)) return;
-    infoSpeicher.liste.push(nr);
-    try { localStorage.setItem(INFO_KEY, JSON.stringify(infoSpeicher.liste.sort())); } catch (e) { /* privat */ }
-  }
-  function infoOffen(nr) { return !OPT.ohneinfo && !!lauf && !lauf.info[nr] && !infoGesehen(nr); }
+  // v13 (MZ, 27.10.2026): einmal je Seitenaufruf (infoGezeigt) – nach „Nochmal“ keine; ein Schritt, der im ersten Durchgang
+  // nicht vorkam (Käufer/Bieterrunde nach Unter Wert/Ladenhüter), zeigt seinen Screen beim ersten späteren Vorkommen,
+  // auch in einem „Nochmal“-Durchgang.
+  function infoOffen(nr) { return !OPT.ohneinfo && !!lauf && !infoGezeigt.has(nr); }
   function mitInfo(nr, ob, danach) {
     if (!infoOffen(nr)) { if (danach) danach(); return false; }
+    infoGezeigt.add(nr);
     lauf.info[nr] = true;
     SCH.stumm();
-    ST.info(nr, ob, () => { infoMerken(nr); if (danach) danach(); });
+    ST.info(nr, ob, () => { if (danach) danach(); });
     return true;
   }
   function schrittAnruf(ob) {
@@ -663,7 +652,7 @@
   window.HN_TEST = {
     zustand() {
       const ob = lauf && lauf.aktuell;
-      return { phase, rahmen: R_.zustand, bennoVorgestellt: benno.vorgestellt, infos: infoSpeicher.ok ? infoSpeicher.liste.slice() : 'ohne Speicher', objekt: lauf ? lauf.i : 0, laeden: lauf ? lauf.laeden : 0, provision: lauf ? lauf.provision : 0,
+      return { phase, rahmen: R_.zustand, bennoVorgestellt: benno.vorgestellt, infos: [...infoGezeigt].sort(), objekt: lauf ? lauf.i : 0, laeden: lauf ? lauf.laeden : 0, provision: lauf ? lauf.provision : 0,
         punkte: lauf ? lauf.ergebnisse.reduce((s, o) => s + o.punkte.schaetzung + o.punkte.besichtigung + o.punkte.kaeufer + o.punkte.bieter, 0) : 0,
         auftrag: lauf && lauf.auftrag ? lauf.auftrag.id + ' ' + lauf.auftrag.text : '', auftragStand: lauf && lauf.auftrag ? auftragText() : '',
         dauer: lauf ? (lauf.dauer || (performance.now() - lauf.start) / 1000) : 0,
