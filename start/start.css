@@ -1,0 +1,178 @@
+/* Startseite „Hammerpreis“ – Pop-Comic mit Emaille-Schild (Skizze gewaehlt.png, MZ 26.10.2026).
+   Gelb/Rot feste Comic-Farben, Schild/Schrift in Kundenfarbe (--haupt aus kunde.js über start/hn-basis.js).
+   Maße bezogen auf 375×812 (Skizze), skaliert über --s (start.js rechnet es aus der Fenstergröße). Klassen .z/.s nicht
+   benutzen (gelten im Logo-SVG). */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+html { --s: 1; --kopf: 58px; }
+body {
+  font-family: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; color: var(--tinte, #16181d);
+  background: radial-gradient(var(--haupt-raster, rgba(31,47,79,.2)) 1.4px, transparent 1.6px) 0 0 / 9px 9px, var(--gelb-hell, #ffe27a);
+  overflow: hidden; display: flex; flex-direction: column; min-height: 100%;
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+/* ---------- Kopf: Logo links (MZ), Ton rechts ---------- */
+.kopf {
+  position: relative; z-index: 20; flex: none; height: calc(var(--kopf) + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  display: flex; justify-content: space-between; align-items: center; background: #fff;
+}
+.logo { height: 28px; display: flex; align-items: center; }
+.logo svg, .logo img { height: 100%; width: auto; display: block; overflow: visible; }
+.ton {
+  width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #fff;
+  border: 2.5px solid var(--tinte); transition: transform .15s;
+}
+.ton svg { width: 18px; height: 18px; fill: none; stroke: var(--tinte); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ton:hover { transform: scale(1.08); }
+.ton:active { transform: scale(.92); }
+
+/* ---------- Strahlen hinter dem Schild (Mitte setzt start.js auf die Schildmitte) ---------- */
+.strahlen-rahmen { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.strahlen {
+  position: absolute; left: var(--sx, 50%); top: var(--sy, 250px); width: 1600px; height: 1600px; margin: -800px 0 0 -800px;
+  background: repeating-conic-gradient(rgba(255,255,255,.55) 0 8deg, transparent 8deg 18deg); border-radius: 50%;
+  pointer-events: none; transform-origin: 50% 50%;
+  -webkit-mask: radial-gradient(circle, #000 30%, rgba(0,0,0,.6) 50%, transparent 70%); mask: radial-gradient(circle, #000 30%, rgba(0,0,0,.6) 50%, transparent 70%);
+}
+
+/* ---------- Bühne ---------- */
+.buehne {
+  position: relative; z-index: 1; flex: 1; min-height: 0; width: 100%; max-width: 480px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-evenly;
+  padding: calc(6px * var(--s)) 0 calc(4px * var(--s));
+  overflow-x: clip;   /* Knall-Stern ragt rechts über: nicht die Seite verbreitern (sonst zoomt das Handy heraus) */
+}
+.oben, .unten { display: flex; flex-direction: column; align-items: center; width: 100%; }
+.name {
+  font: 400 calc(62px * var(--s))/1 'Bangers', 'Figtree', sans-serif; letter-spacing: calc(2px * var(--s)); color: var(--haupt);
+  text-transform: uppercase; text-shadow: calc(3px * var(--s)) calc(3px * var(--s)) 0 #fff, calc(6px * var(--s)) calc(6px * var(--s)) 0 var(--tinte);
+  transform: rotate(-4deg); white-space: nowrap; padding: 0 .1em;
+}
+.schildplatz { position: relative; margin-top: calc(14px * var(--s)); }
+.schild {
+  position: relative; z-index: 1; width: calc(226px * var(--s)); height: calc(142px * var(--s)); border-radius: calc(20px * var(--s));
+  background: var(--haupt); border: calc(3.5px * var(--s)) solid var(--tinte); padding: calc(8px * var(--s));
+  box-shadow: calc(6px * var(--s)) calc(6px * var(--s)) 0 var(--tinte);
+}
+.schild .rand {
+  height: 100%; border: calc(3px * var(--s)) solid #fff; border-radius: calc(13px * var(--s)); color: var(--haupt-text, #fff);
+  text-align: center; padding-top: calc(8px * var(--s)); display: flex; flex-direction: column; align-items: center;
+}
+.schild .k { font: 800 calc(10.5px * var(--s)) 'Figtree', sans-serif; letter-spacing: .13em; text-transform: uppercase; }
+.schild .zahl { font: 900 calc(72px * var(--s))/1 'Figtree', sans-serif; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.schild .v { font: 600 calc(11px * var(--s)) 'Figtree', sans-serif; }
+.schraube {
+  position: absolute; width: calc(10px * var(--s)); height: calc(10px * var(--s)); border-radius: 50%; background: #e9e9e9;
+  border: calc(2px * var(--s)) solid var(--tinte); z-index: 2;
+  margin: calc(-0.5px * var(--s));
+}
+.schraube::after { content: ""; position: absolute; left: 15%; right: 15%; top: 42%; height: 16%; background: rgba(22,24,29,.55); transform: rotate(-35deg); }
+.knall {
+  position: absolute; z-index: 2; right: calc(-56px * var(--s)); top: calc(-16px * var(--s)); width: calc(92px * var(--s)); height: calc(92px * var(--s));
+  overflow: visible; transform-origin: 50% 50%;
+}
+.knall path { fill: var(--rot); stroke: var(--tinte); stroke-width: 3.5; stroke-linejoin: round; }
+.knall text { font: 26px 'Bangers', sans-serif; fill: #fff; stroke: var(--tinte); stroke-width: 1; letter-spacing: .5px; }
+
+/* Figurenwahl */
+.wahl { display: flex; gap: calc(12px * var(--s)); justify-content: center; margin-top: 0; }
+.fig {
+  position: relative; width: calc(116px * var(--s)); border-radius: calc(14px * var(--s)); padding: calc(7px * var(--s)) calc(6px * var(--s));
+  text-align: center; font: 800 calc(13px * var(--s)) 'Figtree', sans-serif; background: #fff; border: 3px solid var(--tinte);
+  transition: transform .18s cubic-bezier(.3,1.4,.5,1), background-color .2s, box-shadow .2s; box-shadow: 0 0 0 var(--tinte);
+}
+.fig .bild { display: block; width: calc(58px * var(--s)); height: calc(58px * var(--s)); margin: 0 auto calc(2px * var(--s)); }
+.fig .bild svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.fig .wort { display: block; white-space: nowrap; }
+.fig .wort .vorname { display: block; font-weight: 900; font-size: calc(16px * var(--s)); line-height: 1.1; }
+.fig .wort .rolle { display: block; font-weight: 600; font-size: calc(11px * var(--s)); line-height: 1.2; opacity: .72; }
+.fig .bild img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.fig.an { background: var(--gelb); box-shadow: 4px 4px 0 var(--tinte); }
+/* Darüberfahren/Drücken ohne Verschieben (Korrekturrunde 2): wandernde Knöpfe ließen Klicks am Rand ins Leere gehen */
+.fig:hover { box-shadow: 4px 4px 0 var(--tinte); }
+.fig:active { filter: brightness(.94); }
+.fig .haken {
+  position: absolute; top: -9px; right: -9px; width: 24px; height: 24px; border-radius: 50%; background: var(--haupt);
+  border: 2.5px solid var(--tinte); display: none; place-items: center;
+}
+.fig .haken::after { content: ""; width: 8px; height: 4.5px; border: solid #fff; border-width: 0 0 2.6px 2.6px; transform: translateY(-1.5px) rotate(-45deg); }
+.fig.an .haken { display: grid; animation: hakenPlopp .3s cubic-bezier(.3,1.6,.5,1); }
+@keyframes hakenPlopp { from { transform: scale(0); } }
+
+/* Spielen-Knopf (Rot = feste Comic-Farbe) */
+.spielen {
+  display: block; width: calc(100% - 44px); max-width: 360px; margin-top: calc(16px * var(--s)); text-align: center; text-decoration: none;
+  font: 400 calc(28px * var(--s))/1 'Bangers', 'Figtree', sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #fff;
+  background: var(--rot); border: 3px solid var(--tinte); border-radius: 14px; padding: calc(10px * var(--s)) 0 calc(8px * var(--s));
+  box-shadow: 5px 5px 0 var(--tinte); transition: transform .15s, box-shadow .15s;
+}
+.spielen:hover { filter: brightness(1.06); box-shadow: 7px 7px 0 var(--tinte); }
+.spielen:active { filter: brightness(.94); box-shadow: 2px 2px 0 var(--tinte); }
+.spielen:focus-visible, .fig:focus-visible, .ton:focus-visible { outline: 3px solid var(--haupt); outline-offset: 3px; }
+
+/* Bilanz-Karten */
+.bilanz { display: grid; grid-template-columns: 1fr 1fr; gap: calc(10px * var(--s)); width: calc(100% - 36px); max-width: 380px; margin-top: calc(16px * var(--s)); }
+.karte {
+  background: #fff; border: 3px solid var(--tinte); border-radius: 12px; padding: calc(6px * var(--s)) calc(10px * var(--s));
+  box-shadow: 3px 3px 0 var(--tinte); min-width: 0;
+}
+.karte b {
+  display: block; font: 900 calc(21px * var(--s))/1.15 'Figtree', sans-serif; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--haupt);   /* Zahlen in Figtree Black (Bangers-7 sah wie 1 aus) */
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;
+}
+#statViertel { text-transform: none; font-size: calc(19px * var(--s)); letter-spacing: -.03em; }   /* Viertelname (z. B. „Schlossviertel“) passt so auch bei 320 px */
+.karte span { font: 600 calc(11.5px * var(--s)) 'Figtree', sans-serif; color: #444; }
+
+/* Footer: Kontaktdaten, nichts anklickbar (MZ). Weißer Balken wie der Kopf, oben schwarze Comic-Kontur, dunkle Schrift,
+   mind. 11px – bei schmalen Bildschirmen lieber umbrechen als kleiner (MZ, 26.10.2026) */
+.fuss {
+  position: relative; z-index: 1; flex: none; font-size: 11px; line-height: 1.6; text-align: center; color: var(--tinte, #16181d);
+  background: #fff; border-top: 3px solid var(--tinte, #16181d);
+  padding: 5px max(10px, env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+}
+.fuss .teil { white-space: nowrap; }
+.fuss u { text-underline-offset: 2px; }
+
+/* ---------- Querformat: links Name + Schild, rechts Figuren, Knopf, Bilanz ---------- */
+html.quer { --kopf: 48px; }
+html.quer .buehne { max-width: 980px; flex-direction: row; justify-content: space-evenly; align-items: center; padding: 0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left)); }
+html.quer .oben, html.quer .unten { width: 48%; max-width: 420px; }
+html.quer .unten .spielen { width: 100%; }
+html.quer .bilanz { width: 100%; }
+html.quer .fuss { padding-top: 3px; padding-bottom: calc(4px + env(safe-area-inset-bottom)); line-height: 1.5; }
+
+/* ---------- sanfte Einblendung (ohne Intro) ---------- */
+html:not(.intro) .name { animation: nameRein .55s cubic-bezier(.2,1.5,.4,1) both; }
+html:not(.intro) .schild { animation: schildRein .6s cubic-bezier(.3,1.4,.5,1) .08s both; }
+html:not(.intro) .knall { animation: knallRein .5s cubic-bezier(.3,1.6,.5,1) .3s both, knallPuls 2.4s ease-in-out 1s infinite; }
+html:not(.intro) .wahl, html:not(.intro) .spielen, html:not(.intro) .karte { animation: gleiten .5s ease both; }
+html:not(.intro) .wahl { animation-delay: .2s; }
+html:not(.intro) .spielen { animation-delay: .3s; }
+html:not(.intro) .karte:nth-child(1) { animation-delay: .38s; } html:not(.intro) .karte:nth-child(2) { animation-delay: .44s; }
+html:not(.intro) .karte:nth-child(3) { animation-delay: .5s; } html:not(.intro) .karte:nth-child(4) { animation-delay: .56s; }
+html.fertig .knall { animation: knallPuls 2.4s ease-in-out .4s infinite; }
+/* nach dem Intro steht schon alles – kein zweites Einfliegen */
+html.ohne-einflug .name, html.ohne-einflug .schild, html.ohne-einflug .wahl, html.ohne-einflug .spielen, html.ohne-einflug .karte { animation: none; }
+@keyframes nameRein { from { opacity: 0; transform: rotate(-4deg) scale(1.6); } }
+@keyframes schildRein { from { opacity: 0; transform: translateY(-30px); } }
+@keyframes knallRein { from { opacity: 0; transform: scale(0) rotate(-30deg); } }
+@keyframes knallPuls { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.07) rotate(4deg); } }
+@keyframes gleiten { from { opacity: 0; transform: translateY(14px); } }
+
+/* ---------- Intro (start/intro.js): alles, was einfliegt, erst verstecken (nur Deckkraft, Lage bleibt) ---------- */
+html.intro .logo, html.intro .ton, html.intro .name, html.intro .schild, html.intro .knall, html.intro .wahl,
+html.intro .spielen, html.intro .karte, html.intro .fuss { opacity: 0; }
+html.intro .kopf { background: transparent; }
+.intro-buehne { position: fixed; inset: 0; z-index: 50; cursor: pointer; overflow: hidden; }
+.intro-buehne svg { position: absolute; left: 0; top: 0; overflow: visible; transform-origin: 0 0; will-change: transform; }
+.intro-kopf { position: fixed; left: 0; right: 0; top: 0; background: #fff; z-index: 15; transform: translateY(-100%); }
+html.nach-intro .logo, html.nach-intro .ton, html.nach-intro .name, html.nach-intro .schild, html.nach-intro .knall, html.nach-intro .wahl,
+html.nach-intro .spielen, html.nach-intro .karte, html.nach-intro .fuss { transition: opacity .35s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+html.ruhig *, html.ruhig *::before, html.ruhig *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }

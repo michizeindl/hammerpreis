@@ -1,0 +1,9 @@
+/* Schriften der Sammlung „Hammerpreis“ (beide SIL Open Font License 1.1, siehe OFL-Bangers.txt / OFL-Figtree.txt).
+   Teilmenge Latein + Deutsch als WOFF2, erzeugt mit Material/Skripte/schrift-woff2.js:
+   node Material/Skripte/schrift-woff2.js Material/Schriften/Bangers <tmp> Bangers Bangers-Regular.ttf:400
+   node Material/Skripte/schrift-woff2.js Material/Schriften/Figtree <tmp> Figtree "Figtree[wght].ttf:300 900"
+   Bangers = Comic-Überschriften und Knöpfe, Figtree (variabel 300–900) = Texte, Zahl auf dem Schild in Black (900). */
+@font-face { font-family: 'Bangers'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('bangers.woff2') format('woff2'); unicode-range: U+0020-007E, U+00A0-00AC, U+00AE-00FF, U+0152-0153, U+1E9E, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2212, U+2248; }
+@font-face { font-family: 'Figtree'; font-style: normal; font-weight: 300 900; font-display: swap;
+  src: url('figtree.woff2') format('woff2'); unicode-range: U+0020-007E, U+00A0-00AC, U+00AE-00FF, U+0152-0153, U+1E9E, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2190, U+2192, U+2212; }

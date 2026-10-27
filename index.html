@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F2F4F">
+<title>Hammerpreis – Musterkamm Immobilien</title>
+<link rel="manifest" href="hammerpreis.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hammerpreis">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preload" href="schrift/bangers.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="schrift/figtree.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="schrift/schrift.css">
+<link rel="stylesheet" href="start/start.css">
+<script src="kunde/kunde.js"></script>
+<script>
+// Intro nur beim ersten Öffnen je Sitzung (oder mit #intro in der Adresse); Klasse vor dem ersten Bild setzen
+(function () {
+  var k = 'mg:intro:hammerpreis:' + ((window.KUNDE || {}).firma || ''), gesehen = null;
+  try { gesehen = sessionStorage.getItem(k); } catch (e) { gesehen = '1'; }
+  if (!gesehen || /^#intro\b/.test(location.hash)) document.documentElement.classList.add('intro');
+})();
+</script>
+</head>
+<body>
+<header class="kopf" id="kopf">
+  <div class="logo" id="logo" role="img" aria-label="Musterkamm Immobilien"></div>
+  <button class="ton" id="tonKnopf" type="button" aria-label="Ton an oder aus"></button>
+</header>
+
+<div class="strahlen-rahmen" aria-hidden="true"><div class="strahlen" id="strahlen"></div></div>
+
+<main class="buehne">
+  <section class="oben">
+    <h1 class="name" id="name">Hammerpreis</h1>
+    <div class="schildplatz">
+      <div class="schild" id="schild">
+        <i class="schraube" style="left:7px;top:7px"></i><i class="schraube" style="right:7px;top:7px"></i>
+        <i class="schraube" style="left:7px;bottom:7px"></i><i class="schraube" style="right:7px;bottom:7px"></i>
+        <div class="rand"><div class="k">Score</div><div class="zahl" id="bestZahl">0</div><div class="v">/1.000 Punkte</div></div>
+      </div>
+      <svg class="knall" id="knall" viewBox="0 0 100 100" aria-hidden="true"><path id="knallStern" d="M50 2l9 22 22-12-6 24 23 4-19 15 15 19-24-2 1 24-17-17-14 20-4-24-23 7 12-21L2 50l23-8L14 21l24 5z"/>
+        <text x="50" y="58" text-anchor="middle">DEAL?</text></svg>
+    </div>
+  </section>
+  <section class="unten">
+    <div class="wahl" id="wahl" role="radiogroup" aria-label="Als wer spielst du?">
+      <button class="fig" type="button" role="radio" data-figur="maklerin"><span class="haken" aria-hidden="true"></span><span class="bild"></span><span class="wort">Maklerin</span></button>
+      <button class="fig" type="button" role="radio" data-figur="makler"><span class="haken" aria-hidden="true"></span><span class="bild"></span><span class="wort">Makler</span></button>
+    </div>
+    <a class="spielen" id="spielen" href="makler-hammerpreis/">Spielen!</a>
+    <div class="bilanz" id="bilanz">
+      <div class="karte"><b id="statVerkauft">0</b><span>Objekte verkauft</span></div>
+      <div class="karte"><b id="statProvision">0 €</b><span>Provision gesamt</span></div>
+      <div class="karte"><b id="statSchaetzung">–</b><span>beste Schätzung</span></div>
+      <div class="karte"><b id="statViertel">–</b><span>dein bestes Viertel</span></div>
+    </div>
+  </section>
+</main>
+
+<footer class="fuss" id="fuss"></footer>
+
+<script src="start/hn-figuren.js"></script>
+<script src="start/hn-basis.js"></script>
+<script src="start/hn-icon.js"></script>
+<script src="start/start.js"></script>
+<script src="start/intro.js"></script>
+<script>
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(function () {});
+</script>
+</body>
+</html>

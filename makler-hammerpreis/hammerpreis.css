@@ -1,0 +1,801 @@
+/* „Hammerpreis“ – Optik im Spiel (Pop-Comic, MZ 26.10.2026): Start-/Endbild Stil 1 „Knall-Karte“, Kopfzeile, Comic-Tafeln
+   der fünf Schritte, Sprechblasen, Einblendungen. Die Schirme des Rahmens bleiben unsichtbar (schirme.js baut eigene).
+   Farben: --haupt (Kundenfarbe aus kunde.js), --gelb/--gelb-hell/--rot/--tinte (feste Comic-Farben) über start/hn-basis.js.
+   Klassen .z/.s nicht benutzen (gelten im Logo-SVG). */
+html, body { font-family: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; background: #9fd2f0; color: var(--tinte); }
+#startSchirm, #endSchirm { display: none !important; }
+button { font: inherit; }
+
+/* ---------- Knöpfe des Rahmens (Menü, Ton, Vollbild) rechts – Logo steht links (MZ) ---------- */
+#anzeige { justify-content: flex-end; z-index: 45; padding-right: max(10px, env(safe-area-inset-right)); top: env(safe-area-inset-top); height: 54px; }
+#anzeige .links, #anzeige .rechts { display: none; }
+#anzeige button, #anzeige a { background: #fff; color: var(--tinte); border: 2.5px solid var(--tinte); box-shadow: 2px 2px 0 var(--tinte); width: 38px; height: 38px; }
+#anzeige button:hover, #anzeige a:hover { background: var(--gelb); }
+#anzeige #heimKnopf { order: -1; }
+
+/* ---------- Logo-Schild oben links (immer allein, weißer Grund) ---------- */
+.hn-logo {
+  position: fixed; z-index: 46; top: calc(8px + env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left));
+  height: 38px; padding: 6px 10px; border-radius: 10px; background: #fff; border: 2.5px solid var(--tinte); box-shadow: 2px 2px 0 var(--tinte);
+  display: flex; align-items: center; pointer-events: none; animation: hnRein .5s cubic-bezier(.3,1.5,.5,1) both;
+}
+.hn-logo svg, .hn-logo img { height: 100%; width: auto; display: block; overflow: visible; }
+@keyframes hnRein { from { opacity: 0; transform: translateY(-10px) scale(.9); } }
+
+/* ---------- Kopfzeile im Spiel ---------- */
+.hn-hud {
+  position: fixed; z-index: 44; left: 0; right: 0; top: calc(56px + env(safe-area-inset-top)); display: flex; justify-content: center; gap: 6px;
+  padding: 0 8px; pointer-events: none; flex-wrap: nowrap; transition: opacity .3s;
+}
+.hn-hud[hidden] { display: flex; opacity: 0; }
+.hn-chip {
+  display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 9px; border-radius: 15px; background: #fff; flex: none;
+  border: 2.5px solid var(--tinte); box-shadow: 2px 2px 0 var(--tinte); font-size: 13px; font-weight: 700; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.hn-chip b { font-weight: 900; color: var(--haupt); }
+.hn-prov { background: var(--gelb); }
+.hn-prov b { color: var(--tinte); }
+.hn-schein { width: 20px; height: 14px; flex: none; }
+.hn-laden { gap: 3px; padding: 0 8px; }
+.hn-laden svg { width: 16px; height: 15px; fill: #fff; stroke: var(--tinte); stroke-width: 2; stroke-linejoin: round; transition: fill .3s, transform .3s; }
+.hn-laden svg.an { fill: var(--rot); transform: scale(1.12); }
+.hn-auftrag { background: var(--haupt); color: #fff; font-size: 12px; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; display: inline-block; line-height: 25px; }
+.hn-auftrag.ja { background: #2f9a4a; }
+.hn-chip.plus { animation: hnPlus .5s ease; }
+.hn-chip.wackeln { animation: hnWackeln .45s ease; }
+@keyframes hnPlus { 40% { transform: scale(1.12) rotate(-2deg); } }
+@keyframes hnWackeln { 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-2px); } }
+html.breit .hn-hud { top: calc(12px + env(safe-area-inset-top)); left: 190px; right: 150px; }
+
+/* ---------- Bühne und Tafeln ---------- */
+.hn-buehne {
+  position: fixed; z-index: 10; left: 0; right: 0; top: calc(96px + env(safe-area-inset-top)); bottom: 0;
+  display: flex; justify-content: center; align-items: flex-start; padding: 0 10px calc(10px + env(safe-area-inset-bottom)); pointer-events: none;
+}
+html.breit .hn-buehne { top: calc(60px + env(safe-area-inset-top)); }
+.hn-panel {
+  position: absolute; left: 50%; transform: translateX(-50%); width: min(100% - 20px, 460px); max-height: 100%;
+  display: flex; flex-direction: column; background: #fff; border: 3.5px solid var(--tinte); border-radius: 18px;
+  box-shadow: 6px 6px 0 var(--tinte); pointer-events: auto; overflow: hidden;
+  animation: hnTafelRein .42s cubic-bezier(.25,1.3,.5,1) both;
+}
+.hn-panel.weg { animation: hnTafelRaus .38s ease both; pointer-events: none; }
+@keyframes hnTafelRein { from { opacity: 0; transform: translateX(calc(-50% + 60px)) rotate(2deg); } }
+@keyframes hnTafelRaus { to { opacity: 0; transform: translateX(calc(-50% - 60px)) rotate(-2deg); } }
+.hn-pkopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px 6px; flex: none; }
+.hn-tag {
+  margin: 0; display: inline-block; font: 400 24px/1 'Bangers', 'Figtree', sans-serif; letter-spacing: 1.5px; color: #fff; text-transform: uppercase;
+  background: var(--rot); border: 2.5px solid var(--tinte); padding: 5px 11px 3px; box-shadow: 3px 3px 0 var(--tinte); transform: rotate(-3deg);
+}
+.hn-schritte { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; }
+.hn-schritte li { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--tinte); display: grid; place-items: center; background: #fff; opacity: .45; }
+.hn-schritte li svg { width: 15px; height: 15px; fill: none; stroke: var(--tinte); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.hn-schritte li.durch { opacity: .85; background: var(--haupt-blass); }
+.hn-schritte li.jetzt { opacity: 1; background: var(--gelb); transform: scale(1.12); box-shadow: 2px 2px 0 var(--tinte); }
+.hn-pinhalt { padding: 4px 14px 8px; overflow-y: auto; overflow-x: hidden; flex: 1 1 auto; min-height: 0; }
+.hn-pfuss { padding: 6px 14px 14px; flex: none; display: flex; flex-direction: column; gap: 6px; }
+.hn-erg { margin: 0; text-align: center; font-weight: 700; font-size: 14px; }
+.hn-erg b, .hn-abw b { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 10px; background: var(--gelb); border: 2px solid var(--tinte); font-weight: 900; }
+.hn-klein { font-size: 11.5px; color: #555; margin: 4px 0 0; line-height: 1.35; }
+
+/* Knöpfe (Hauptknopf gefüllt Rot, Nebenknöpfe umrandet) */
+.hn-kn {
+  display: block; width: 100%; text-align: center; border: 3px solid var(--tinte); border-radius: 13px; cursor: pointer; text-decoration: none;
+  font: 400 23px/1 'Bangers', 'Figtree', sans-serif; letter-spacing: 1.8px; text-transform: uppercase; padding: 10px 0 8px;
+  transition: transform .12s, box-shadow .12s, background-color .15s;
+}
+.hn-kn.haupt { background: var(--rot); color: #fff; box-shadow: 4px 4px 0 var(--tinte); }
+.hn-kn.neben { background: #fff; color: var(--haupt); }
+.hn-kn.kunde { background: var(--haupt); color: var(--haupt-text, #fff); font: 800 15px/1.2 'Figtree', sans-serif; letter-spacing: .2px; text-transform: none; padding: 11px 0; box-shadow: 4px 4px 0 var(--tinte); cursor: default; }
+a.hn-kn.kunde { cursor: pointer; }
+/* Darüberfahren ohne Verschieben (Korrekturrunde 2): ein wandernder Knopf ließ Klicks am Rand ins Leere gehen */
+.hn-kn:not([disabled]):not(.kunde):hover { filter: brightness(1.06); box-shadow: 6px 6px 0 var(--tinte); }
+.hn-kn.neben:not([disabled]):hover { background: var(--gelb-hell); box-shadow: none; }
+.hn-kn.haupt:not([disabled]):active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--tinte); }
+.hn-kn[disabled] { opacity: .65; }
+.hn-kn:focus-visible, .hn-kk:focus-visible, .hn-hw:focus-visible, .hn-zuschlag:focus-visible { outline: 3px solid var(--haupt); outline-offset: 2px; }
+
+/* ---------- (1) Anruf ---------- */
+.hn-klingel { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 13px; color: #444; margin-bottom: 8px; }
+.hn-tel { width: 34px; height: 34px; border-radius: 50%; background: #2f9a4a; border: 2.5px solid var(--tinte); display: grid; place-items: center; animation: hnKlingeln 1.2s ease-in-out infinite; }
+.hn-tel svg { width: 18px; height: 18px; fill: #fff; stroke: var(--tinte); stroke-width: 1.5; stroke-linejoin: round; }
+@keyframes hnKlingeln { 0%, 60%, 100% { transform: rotate(0); } 10%, 30%, 50% { transform: rotate(-14deg); } 20%, 40% { transform: rotate(14deg); } }
+.hn-eig { display: flex; align-items: flex-start; gap: 10px; }
+.hn-eig .fig { width: 74px; height: 74px; flex: none; animation: hnHuepf .5s cubic-bezier(.3,1.6,.5,1) both; }
+.hn-eig .fig svg, .hn-kk .fig svg, .hn-bp .fig svg, .hn-sprecher .fig svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.hn-blase {
+  position: relative; background: #fff; border: 2.5px solid var(--tinte); border-radius: 16px; padding: 9px 12px; font-size: 14px; line-height: 1.38;
+  box-shadow: 3px 3px 0 var(--tinte); animation: hnBlase .4s ease .15s both;
+}
+.hn-blase.links::before { content: ""; position: absolute; left: -10px; top: 18px; width: 14px; height: 14px; background: #fff; border-left: 2.5px solid var(--tinte); border-bottom: 2.5px solid var(--tinte); transform: rotate(45deg); }
+@keyframes hnBlase { from { opacity: 0; transform: scale(.85); transform-origin: 0 30%; } }
+@keyframes hnHuepf { from { opacity: 0; transform: translateY(14px) scale(.8); } }
+.hn-expose-kurz { display: flex; gap: 12px; align-items: center; margin-top: 12px; background: var(--gelb-hell); border: 2.5px solid var(--tinte); border-radius: 12px; padding: 8px 10px; }
+.hn-expose-kurz .bild, .hn-objzeile .bild { width: 92px; height: 62px; flex: none; border: 2.5px solid var(--tinte); border-radius: 8px; overflow: hidden; background: #bfe3f5; }
+.hn-expose-kurz .bild svg, .hn-objzeile .bild svg, .hn-mini svg, .hn-expo .bild svg, .hn-expo-gross .bild svg { width: 100%; height: 100%; display: block; }
+.hn-expose-kurz dl { min-width: 0; margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 1px 10px; font-size: 13px; }
+.hn-expose-kurz dt { color: #555; font-weight: 600; }
+.hn-expose-kurz dd { margin: 0; font-weight: 800; overflow-wrap: anywhere; }
+.hn-expose-kurz dd.wunsch { color: var(--rot); }
+
+/* ---------- (2) Besichtigung ---------- */
+.hn-bes-kopf { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; font-weight: 700; gap: 8px; }
+.hn-zaehler { font-weight: 800; white-space: nowrap; background: var(--gelb); border: 2px solid var(--tinte); border-radius: 10px; padding: 1px 8px; }
+.hn-uhr { height: 9px; border: 2px solid var(--tinte); border-radius: 6px; margin: 6px 0 8px; overflow: hidden; background: #fff; }
+.hn-uhr i { display: block; height: 100%; background: #2f9a4a; transform-origin: 0 50%; transition: background-color .3s; }
+.hn-uhr.knapp i { background: var(--rot); }
+.hn-raum { position: relative; width: 100%; aspect-ratio: 4 / 3; max-height: calc(100dvh - 330px); min-height: 170px; border: 3px solid var(--tinte); border-radius: 10px; overflow: hidden; background: #f2e3c4; margin: 0 auto; }
+.hn-raum canvas { position: absolute; inset: 0; display: block; touch-action: none; cursor: crosshair; }
+/* verschwiegener Mangel gefunden: Knall-Einblendung oben im Raum (hält die Zeit nicht an, Tippen geht durch) */
+.hn-bonus {
+  position: absolute; left: 50%; top: 8px; z-index: 2; pointer-events: none; transform: translateX(-50%) rotate(-3deg);
+  display: flex; flex-direction: column; align-items: center; gap: 2px; max-width: calc(100% - 16px);
+  padding: 6px 14px 7px; background: var(--gelb); border: 3px solid var(--tinte); border-radius: 12px; box-shadow: 3px 3px 0 var(--tinte);
+  text-align: center; animation: hnBonusRein .45s cubic-bezier(.3,1.6,.5,1) both; transition: opacity .45s, transform .45s;
+}
+.hn-bonus span { font-family: 'Bangers', 'Figtree', sans-serif; font-size: 19px; letter-spacing: .03em; line-height: 1.05; color: var(--rot); -webkit-text-stroke: .4px var(--tinte); }
+.hn-bonus b { display: flex; align-items: center; gap: 5px; font-weight: 900; font-size: 14px; white-space: nowrap; }
+.hn-bonus .hn-schein { width: 22px; height: 15px; }
+.hn-bonus.weg { opacity: 0; transform: translateX(-50%) translateY(-10px) rotate(-3deg); }
+@keyframes hnBonusRein { from { opacity: 0; transform: translateX(-50%) rotate(-10deg) scale(1.9); } }
+
+/* ---------- (3) Schätzen ---------- */
+.hn-s-schaetzen .hn-pkopf { flex-wrap: nowrap; }
+.hn-spiegel { margin-left: auto; font: 800 12px 'Figtree', sans-serif; background: var(--gelb-hell); border: 2px solid var(--tinte); border-radius: 10px; padding: 5px 8px; cursor: pointer; box-shadow: 2px 2px 0 var(--tinte); }
+.hn-s-schaetzen .hn-schritte { display: none; }
+.hn-steckkopf { margin: 0 0 5px; font-size: 14.5px; }
+.hn-steckkopf b { font-weight: 900; color: var(--haupt); }
+.hn-steck { display: grid; grid-template-columns: 1.45fr .85fr 1fr 1fr; gap: 5px; }
+.hn-steck.grund { grid-template-columns: 1fr 2fr; }
+.hn-steck.grund > div.breit { grid-column: auto; }
+.hn-steck > div { background: #f5f6f8; border: 2px solid var(--tinte); border-radius: 8px; padding: 3px 7px; min-width: 0; }
+.hn-steck > div.breit { grid-column: 1 / -1; }
+.hn-steck span { display: block; font-size: 10.5px; color: #555; font-weight: 600; }
+.hn-steck b { display: block; font-size: 13.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hn-steck b.frage { color: #9aa0a8; }
+.hn-steck b.neu { animation: hnNeu .6s ease; color: var(--haupt); }
+.hn-steck .aufgedeckt { background: var(--gelb-hell); }
+@keyframes hnNeu { 30% { transform: scale(1.15); } }
+.hn-mchips, .hn-tchips { display: flex; flex-wrap: wrap; gap: 4px; margin: 7px 0 0; }
+.hn-mchips.leer { font-size: 12px; color: #666; }
+.hn-mchip, .hn-tchip { font-size: 12px; font-weight: 800; padding: 2px 8px; border-radius: 10px; border: 2px solid var(--tinte); background: #fff; white-space: nowrap; }
+.hn-mchip.plus { background: #c9efcf; }
+.hn-mchip.minus { background: #ffd0cb; }
+.hn-mchip.markt { background: var(--haupt); color: #fff; }
+.hn-tchip { background: var(--haupt-blass); }
+.hn-hinweise { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 8px; position: relative; }
+.hn-hinweise:has(.hn-hw:nth-child(2):last-child) { grid-template-columns: 1fr 1fr; }
+.hn-hw {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px 4px; border: 2.5px solid var(--tinte); border-radius: 10px;
+  background: #fff; cursor: pointer; font-size: 10.5px; font-weight: 800; box-shadow: 2px 2px 0 var(--tinte); transition: transform .12s, background-color .2s;
+}
+.hn-hw svg { width: 20px; height: 20px; fill: none; stroke: var(--haupt); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hn-hw em { position: absolute; top: -8px; right: -6px; font-style: normal; font-size: 10.5px; font-weight: 900; background: var(--rot); color: #fff; border: 2px solid var(--tinte); border-radius: 9px; padding: 0 5px; }
+.hn-hw:not([disabled]):hover { background: var(--gelb-hell); box-shadow: 3px 3px 0 var(--tinte); }
+.hn-hw.offen { background: var(--gelb); box-shadow: none; transform: translate(2px, 2px); opacity: 1; }
+.hn-hw.offen em { background: var(--tinte); }
+.hn-hw[disabled]:not(.offen) { opacity: .5; }
+.hn-hinweisbild { margin-top: 7px; }
+.hn-hb { display: flex; align-items: center; gap: 10px; border: 2px dashed var(--tinte); border-radius: 10px; padding: 5px 8px; font-size: 12.5px; font-weight: 700; animation: hnHuepf .35s ease both; }
+.hn-hb svg { width: 120px; height: auto; flex: none; display: block; }
+.hn-hb[data-h="stadtplan"] svg { width: 140px; }
+.hn-jahr { font: 900 32px/1 'Figtree', sans-serif; color: var(--haupt); border: 3px solid var(--haupt); border-radius: 8px; padding: 4px 10px 3px; transform: rotate(-4deg); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.hn-regler { margin-top: 10px; }
+.hn-preiszeile { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.hn-preis { font: 900 32px/1.1 'Figtree', sans-serif; color: var(--haupt); min-width: 190px; text-align: center; font-variant-numeric: tabular-nums; letter-spacing: -.5px; }
+.hn-pm { width: 42px; height: 42px; border-radius: 50%; border: 3px solid var(--tinte); background: var(--gelb); font: 900 24px/1 'Figtree', sans-serif; cursor: pointer; box-shadow: 2px 2px 0 var(--tinte); touch-action: manipulation; }
+.hn-pm:active { transform: translate(2px, 2px); box-shadow: none; }
+.hn-schiene { position: relative; margin: 6px 4px 0; }
+.hn-schiene input { width: 100%; height: 36px; margin: 0; background: transparent; -webkit-appearance: none; appearance: none; touch-action: pan-y; --p: 50%; }
+.hn-schiene input::-webkit-slider-runnable-track { height: 12px; border-radius: 7px; border: 2.5px solid var(--tinte); background: linear-gradient(90deg, var(--haupt) var(--p), #fff var(--p)); }
+.hn-schiene input::-moz-range-track { height: 8px; border-radius: 7px; border: 2.5px solid var(--tinte); background: linear-gradient(90deg, var(--haupt) var(--p), #fff var(--p)); }
+.hn-schiene input::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; margin-top: -12px; border-radius: 50%; background: var(--rot); border: 3px solid var(--tinte); box-shadow: 2px 2px 0 var(--tinte); cursor: grab; }
+.hn-schiene input::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: var(--rot); border: 3px solid var(--tinte); cursor: grab; }
+.hn-wunschmarke { position: absolute; top: 4px; width: 4px; height: 28px; margin-left: -2px; background: var(--tinte); border-radius: 2px; pointer-events: none; opacity: .5; }
+.hn-skala { position: relative; height: 16px; font-size: 10.5px; color: #555; font-weight: 700; margin: 0 4px; }
+.hn-skala .min { position: absolute; left: 0; } .hn-skala .max { position: absolute; right: 0; }
+.hn-skala .w { position: absolute; transform: translateX(-50%); color: var(--tinte); }
+.hn-hinweistext { font-size: 10px; color: #777; text-align: center; margin: 6px 0 0; }
+.hn-aufloesung { margin-top: 10px; text-align: center; position: relative; animation: hnHuepf .4s ease both; }
+.hn-vergleich { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.hn-vergleich > div { border: 2.5px solid var(--tinte); border-radius: 10px; padding: 5px; background: #f5f6f8; }
+.hn-vergleich > div:last-child { background: var(--gelb-hell); }
+.hn-vergleich span { display: block; font-size: 11px; color: #555; font-weight: 700; }
+.hn-vergleich b { font: 900 21px/1.15 'Figtree', sans-serif; color: var(--haupt); }
+.hn-abw { font-weight: 800; font-size: 14px; margin: 8px 0 0; }
+.hn-stempel {
+  display: inline-block; font: 400 26px/1 'Bangers', sans-serif; letter-spacing: 2px; color: var(--rot); border: 4px solid var(--rot); border-radius: 6px;
+  padding: 4px 10px 1px; transform: rotate(-12deg); background: rgba(255,255,255,.88); text-transform: uppercase; animation: hnStempel .35s cubic-bezier(.3,1.6,.5,1) both;
+}
+.hn-stempel.grau { color: #555; border-color: #555; }
+.hn-stempel.gross { font-size: 34px; margin-top: 6px; }
+@keyframes hnStempel { from { opacity: 0; transform: rotate(-12deg) scale(2.2); } }
+
+/* ---------- (4) Käufer ---------- */
+.hn-objzeile { display: flex; gap: 10px; align-items: center; }
+.hn-objzeile .bild { width: 76px; height: 52px; }
+.hn-objzeile b { font-size: 14px; }
+.hn-objzeile .hn-tchips { margin-top: 3px; }
+.hn-frage-zeile { font-weight: 800; margin: 10px 0 6px; font-size: 14.5px; }
+.hn-kaeufer { display: flex; flex-direction: column; gap: 8px; }
+.hn-kk {
+  display: flex; align-items: center; gap: 10px; text-align: left; padding: 7px 10px; border: 3px solid var(--tinte); border-radius: 14px; background: #fff;
+  box-shadow: 3px 3px 0 var(--tinte); cursor: pointer; color: var(--tinte); transition: transform .15s, background-color .2s; animation: hnHuepf .4s ease calc(var(--i) * .08s) both;
+}
+.hn-kk:not([disabled]):hover { background: var(--gelb-hell); box-shadow: 5px 5px 0 var(--tinte); }
+.hn-kk .fig { width: 54px; height: 54px; flex: none; }
+.hn-kk .txt { display: flex; flex-direction: column; gap: 1px; font-size: 12.5px; line-height: 1.3; }
+.hn-kk .txt b { font-size: 14px; }
+.hn-kk .budget { font-weight: 900; color: var(--haupt); font-size: 13px; }
+.hn-kk[disabled] { opacity: .55; cursor: default; }
+.hn-kk.passt { opacity: 1; background: #c9efcf; position: relative; }
+.hn-kk.falsch { opacity: 1; background: #ffd0cb; }
+.hn-kk.gewaehlt { transform: scale(1.02); box-shadow: 5px 5px 0 var(--tinte); }
+.hn-kk.passt::after { content: "✓"; position: absolute; right: -8px; top: -10px; width: 26px; height: 26px; border-radius: 50%; background: #2f9a4a; color: #fff; border: 2.5px solid var(--tinte); display: grid; place-items: center; font-weight: 900; font-size: 14px; }
+
+/* ---------- (5) Bieterrunde ---------- */
+.hn-gebot { text-align: center; }
+.hn-gebot .hn-klein { display: block; margin-top: 2px; }
+.hn-gebot .k { display: block; font-size: 12px; font-weight: 800; color: #555; text-transform: uppercase; letter-spacing: .1em; }
+/* Große Zahlen in Figtree Black wie die Zahl auf dem Schild der Startseite (in Bangers sah die 7 wie eine 1 aus, 27.10.2026); Comic-Wirkung über Schatten und leichte Schräge */
+.hn-betrag { display: inline-block; font: 900 44px/1.1 'Figtree', sans-serif; letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--haupt); text-shadow: 2px 2px 0 var(--gelb), 4px 4px 0 var(--tinte); transform: rotate(-2deg); }
+.hn-betrag.tick { animation: hnTick .25s ease; }
+@keyframes hnTick { 40% { transform: rotate(-2deg) scale(1.08); } }
+.hn-bieterreihe { display: flex; justify-content: center; gap: 10px; margin-top: 30px; }
+.hn-bp { position: relative; width: 92px; text-align: center; font-size: 12px; }
+.hn-bp .fig { display: block; width: 64px; height: 64px; margin: 0 auto 2px; transition: transform .2s; }
+.hn-bp.deiner b { color: var(--haupt); }
+.hn-bp.deiner .fig { filter: drop-shadow(0 0 0 var(--gelb)); }
+.hn-bp.hebt .fig { animation: hnHebt .35s ease; }
+@keyframes hnHebt { 40% { transform: translateY(-8px) rotate(-4deg); } }
+.hn-bp .blase {
+  position: absolute; left: 50%; bottom: calc(100% - 2px); transform: translateX(-50%) scale(0); transform-origin: 50% 100%; white-space: nowrap;
+  background: #fff; border: 2.5px solid var(--tinte); border-radius: 12px; padding: 3px 8px; font-weight: 900; font-size: 13px; box-shadow: 2px 2px 0 var(--tinte); transition: transform .2s cubic-bezier(.3,1.6,.5,1);
+}
+.hn-bp .blase.an { transform: translateX(-50%) scale(1); }
+.hn-bp .blase.leise { font-weight: 700; color: #555; }
+.hn-bp .blase.zoegern { background: var(--gelb); }
+.hn-bp .blase.raus { background: var(--rot); color: #fff; }
+.hn-panel.zoegern .hn-bp .fig { animation: hnZittern .25s linear infinite; }
+@keyframes hnZittern { 50% { transform: translateX(1.5px) rotate(1deg); } }
+.hn-bieterhinweis { text-align: center; }
+.hn-zuschlag {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 0 10px; border: 3.5px solid var(--tinte); border-radius: 16px;
+  background: var(--rot); color: #fff; font: 400 32px/1 'Bangers', sans-serif; letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+  box-shadow: 5px 5px 0 var(--tinte); touch-action: manipulation;
+}
+.hn-zuschlag svg { width: 30px; height: 30px; fill: #fff; stroke: var(--tinte); stroke-width: 1.8; stroke-linejoin: round; }
+.hn-zuschlag:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--tinte); }
+.hn-panel.zoegern .hn-zuschlag { animation: hnPuls .4s ease-in-out infinite; }
+/* Puls ohne Größenänderung (Korrekturrunde 2): Leuchten statt Wachsen – der Knopf bleibt beim Antippen genau an seinem Platz */
+@keyframes hnPuls { 50% { background-color: #ff6a4d; box-shadow: 0 0 0 5px rgba(255,214,0,.85), 5px 5px 0 var(--tinte); } }
+.hn-s-bieter .hn-pinhalt { position: relative; }
+.hn-stempel.verkauft { position: absolute; left: 50%; top: 36%; margin-left: -70px; font-size: 38px; }
+
+/* ---------- Exposé nach dem Objekt ---------- */
+.hn-s-expose .hn-tag { background: #2f9a4a; }
+.hn-s-expose.laden .hn-tag { background: #6a6f78; }
+.hn-expo-gross { display: flex; gap: 12px; align-items: center; }
+.hn-expo-gross .bild { position: relative; width: 120px; height: 82px; flex: none; border: 3px solid var(--tinte); border-radius: 8px; overflow: hidden; box-shadow: 3px 3px 0 var(--tinte); }
+.hn-expo-gross .bild .hn-stempel { position: absolute; left: 6px; top: 24px; font-size: 20px; padding: 3px 6px 0; border-width: 3px; }
+.hn-expo-gross .daten { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.hn-expo-gross .daten > b { font-size: 14.5px; }
+.hn-rechnung { margin-top: 10px; border: 2px solid var(--tinte); border-radius: 10px; padding: 5px 9px; background: #f5f6f8; font-size: 12.5px; }
+.hn-rechnung summary { font-weight: 800; cursor: pointer; }
+.hn-rechnung ul, .hn-punktliste { list-style: none; margin: 4px 0 0; padding: 0; }
+.hn-rechnung li, .hn-punktliste li { display: flex; justify-content: space-between; gap: 10px; padding: 1px 0; }
+.hn-rechnung li b.plus { color: #2f8a44; } .hn-rechnung li b.minus { color: #c8352d; }
+.hn-rechnung li.summe, .hn-punktliste li.summe { border-top: 2px solid var(--tinte); margin-top: 3px; padding-top: 3px; font-weight: 900; }
+.hn-punktliste { margin-top: 10px; font-size: 13.5px; }
+.hn-punktliste li span { flex: 1; }
+.hn-punktliste li b { font-weight: 900; min-width: 28px; text-align: right; }
+.hn-punktliste li i { font-style: normal; color: #777; width: 40px; }
+.hn-punktliste li.summe b { font-size: 16px; color: var(--haupt); }
+.hn-provzeile { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 8px 0 0; font-weight: 700; background: var(--gelb); border: 2.5px solid var(--tinte); border-radius: 18px; padding: 4px 10px; font-size: 14px; }
+
+/* ---------- Sprechblasen der Figuren ---------- */
+.hn-sprecher {
+  position: fixed; z-index: 48; bottom: calc(10px + env(safe-area-inset-bottom)); display: flex; align-items: flex-end; gap: 4px; pointer-events: none;
+  max-width: min(80vw, 330px); opacity: 0; transition: opacity .25s, transform .35s cubic-bezier(.3,1.4,.5,1);
+}
+.hn-sprecher.ich { left: 8px; transform: translateX(-30px); }
+.hn-sprecher.konkurrenz { right: 8px; flex-direction: row-reverse; transform: translateX(30px); }
+.hn-sprecher.an { opacity: 1; transform: none; }
+.hn-sprecher .fig { width: 62px; height: 62px; flex: none; filter: drop-shadow(2px 2px 0 rgba(22,24,29,.25)); }
+.hn-sprecher .blase { background: #fff; border: 2.5px solid var(--tinte); border-radius: 14px; padding: 6px 10px; font-size: 13px; font-weight: 700; box-shadow: 3px 3px 0 var(--tinte); margin-bottom: 30px; line-height: 1.3; }
+.hn-sprecher.konkurrenz .blase { background: #f3e1ef; }
+
+/* ---------- Einblendungen (Tagesauftrag, Markt-Ereignis, Preisspiegel, Mappe) ---------- */
+.hn-einblendung { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(22,24,29,.35); animation: hnDunkel .25s ease both; }
+.hn-einblendung[hidden] { display: none; }
+@keyframes hnDunkel { from { background: rgba(22,24,29,0); } }
+.hn-einbl-karte {
+  width: min(100%, 380px); max-height: 100%; overflow: auto; background: #fff; border: 3.5px solid var(--tinte); border-radius: 18px; box-shadow: 6px 6px 0 var(--tinte);
+  padding: 16px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; animation: hnKnall .45s cubic-bezier(.3,1.5,.5,1) both;
+}
+.hn-einbl-karte.breit { width: min(100%, 620px); }
+@keyframes hnKnall { from { opacity: 0; transform: scale(.6) rotate(-6deg); } }
+.hn-einbl-karte .hn-kn { margin-top: 6px; }
+.hn-auftragstext { font-weight: 800; font-size: 18px; margin: 4px 0 0; line-height: 1.3; }
+.hn-einbl-karte.auftrag { background: var(--gelb-hell); }
+.hn-zeitung { width: 100%; background: #f6f1e4; border: 2px solid var(--tinte); padding: 10px; text-align: left; }
+.hn-zeitung .kopf { font: 400 22px/1 'Bangers', sans-serif; letter-spacing: 1px; text-align: center; border-bottom: 3px double var(--tinte); padding-bottom: 5px; margin-bottom: 6px; }
+.hn-zeitung h3 { margin: 4px 0; font: 900 21px/1.15 'Figtree', sans-serif; }
+.hn-zeitung p { margin: 3px 0; font-size: 13.5px; }
+.hn-zeitung .wirkung { font-weight: 700; }
+.hn-zeitung .wirkung b { background: var(--gelb); border: 2px solid var(--tinte); border-radius: 8px; padding: 0 6px; }
+.hn-tabelle { border-collapse: collapse; width: 100%; font-size: 14px; }
+.hn-tabelle td { border-bottom: 1.5px solid #ddd; padding: 4px 6px; text-align: left; }
+.hn-tabelle td:last-child { text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }
+.hn-tabelle tr.hier td { background: var(--gelb-hell); font-weight: 900; }
+.hn-mappe { position: relative; width: 100%; background: #f0c96a; border: 3px solid var(--tinte); border-radius: 6px 16px 16px 16px; padding: 12px 8px 8px; margin-top: 26px; }
+.hn-reiter { position: absolute; top: -28px; left: -3px; background: #f0c96a; border: 3px solid var(--tinte); border-bottom: 0; border-radius: 10px 10px 0 0; padding: 5px 12px 3px; font: 400 20px/1 'Bangers', sans-serif; letter-spacing: 1.5px; color: var(--haupt); }
+.hn-mappe-inhalt { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.hn-expo { background: #fff; border: 2.5px solid var(--tinte); border-radius: 6px; padding: 4px; font-size: 11px; text-align: left; display: flex; flex-direction: column; box-shadow: 2px 2px 0 var(--tinte); }
+.hn-expo:nth-child(odd) { transform: rotate(-1.5deg); } .hn-expo:nth-child(even) { transform: rotate(1.2deg); }
+.hn-expo .bild { position: relative; height: 50px; border: 2px solid var(--tinte); border-radius: 3px; overflow: hidden; margin-bottom: 3px; }
+.hn-expo .bild .hn-stempel { position: absolute; left: 4px; top: 12px; font-size: 14px; padding: 2px 4px 0; border-width: 2.5px; }
+.hn-expo b { font-size: 11.5px; }
+.hn-expo .abw { color: #666; }
+.hn-expo.laden { opacity: .8; }
+
+/* ---------- Start- und Endbild „Knall-Karte“ ---------- */
+.hn-schirm {
+  position: fixed; inset: 0; z-index: 30; overflow: hidden auto; display: flex; justify-content: center; align-items: center;
+  padding: calc(60px + env(safe-area-inset-top)) 18px calc(14px + env(safe-area-inset-bottom));
+  background: radial-gradient(var(--haupt-raster) 1.4px, transparent 1.6px) 0 0 / 9px 9px, var(--gelb-hell);
+}
+.hn-schirm[hidden] { display: none; }
+.hn-strahlen { position: fixed; left: 50%; top: 42%; width: 1500px; height: 1500px; margin: -750px 0 0 -750px; background: repeating-conic-gradient(rgba(255,255,255,.5) 0 8deg, transparent 8deg 18deg); border-radius: 50%; pointer-events: none; animation: hnDrehen 90s linear infinite; }
+@keyframes hnDrehen { to { transform: rotate(360deg); } }
+.hn-mitte { position: relative; width: 100%; max-width: 360px; margin: auto 0; display: flex; flex-direction: column; align-items: center; }
+.hn-figur-oben { width: 96px; height: 96px; margin-bottom: -12px; position: relative; z-index: 0; animation: hnGucken .6s cubic-bezier(.3,1.5,.5,1) .25s both; }
+.hn-figur-oben svg { width: 100%; height: 100%; display: block; overflow: visible; }
+@keyframes hnGucken { from { transform: translateY(40px); opacity: 0; } }
+.hn-schirm .hn-karte {
+  position: relative; z-index: 1; width: 100%; background: #fff; border: 3.5px solid var(--tinte); border-radius: 18px; box-shadow: 6px 6px 0 var(--tinte);
+  padding: 16px 16px 14px; text-align: center; animation: hnGleiten .5s ease .08s both;
+}
+@keyframes hnGleiten { from { opacity: 0; transform: translateY(18px); } }
+.hn-schirm .hn-band {
+  display: inline-block; margin: 0; font: 400 34px/1 'Bangers', 'Figtree', sans-serif; letter-spacing: 2px; color: #fff; background: var(--rot); border: 3px solid var(--tinte);
+  padding: 8px 16px 6px; box-shadow: 4px 4px 0 var(--tinte); transform: rotate(-4deg); text-transform: uppercase;
+  animation: hnBandRein .55s cubic-bezier(.3,1.6,.5,1) .2s both, hnBandPuls 2.6s ease-in-out 1.2s infinite;
+}
+@keyframes hnBandRein { from { opacity: 0; transform: rotate(-4deg) scale(1.8); } }
+@keyframes hnBandPuls { 0%, 100% { transform: rotate(-4deg) scale(1); } 50% { transform: rotate(-4deg) scale(1.05); } }
+.hn-frage { margin-top: 16px; }
+.hn-frage .hn-blase { display: inline-block; font-weight: 800; padding: 7px 12px; animation-delay: .4s; }
+.hn-frage .hn-blase::after { content: ""; position: absolute; width: 13px; height: 13px; background: #fff; border-right: 2.5px solid var(--tinte); border-bottom: 2.5px solid var(--tinte); transform: rotate(45deg); left: 30px; bottom: -9px; }
+.hn-anl { font: 500 13.5px/1.45 'Figtree', sans-serif; color: #333; margin: 10px 0 0; }
+.hn-best { display: inline-block; margin-top: 12px; background: var(--haupt); color: var(--haupt-text, #fff); border: 3px solid var(--tinte); border-radius: 10px; padding: 5px 12px; font: 700 12px 'Figtree', sans-serif; letter-spacing: .6px; text-transform: uppercase; }
+.hn-best b { font: 900 17px 'Figtree', sans-serif; letter-spacing: 0; margin-left: 4px; text-transform: none; }
+.hn-best.neu { background: var(--rot); animation: hnPlus .6s ease 1s 2; }
+.hn-schirm .hn-kn { margin-top: 10px; }
+.hn-reihe2 { display: flex; gap: 8px; }
+.hn-reihe2 .hn-kn { flex: 1; font-size: 20px; }
+.hn-schirm .hn-klein { text-align: center; }
+/* Endbild: Punkte im großen Knall-Stern */
+.hn-knallpunkte { position: relative; width: 230px; height: 230px; margin-bottom: -40px; z-index: 2; animation: hnKnall .6s cubic-bezier(.3,1.5,.5,1) both; }
+.hn-knallpunkte svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; animation: hnSternDreh 14s linear infinite; }
+.hn-knallpunkte path { fill: #fff; stroke: var(--tinte); stroke-width: 3; stroke-linejoin: round; }
+.hn-knallpunkte.null path { fill: #eceef1; }
+/* Comic-Hammer je Bewertungsstufe (MZ, 27.10.2026): schwingt von links oben herein und haut in den Stern, der wackelt;
+   Stufe 5 (unter 550) verfehlt den Stern und fällt daneben. Bei „Bewegung reduzieren“ nur eingeblendet (Regel unten). */
+.hn-hammer { position: absolute; z-index: 3; left: -44%; top: 6%; width: 50%; height: auto; pointer-events: none; transform-origin: 18% 10%;
+  filter: drop-shadow(3px 3px 0 rgba(22,24,29,.3)); animation: hnHammerSchlag .6s cubic-bezier(.55,0,.8,.4) .5s both; }
+@keyframes hnHammerSchlag { 0% { opacity: 0; transform: rotate(-80deg); } 12% { opacity: 1; } 72% { transform: rotate(7deg); } 86% { transform: rotate(-4deg); } 100% { opacity: 1; transform: rotate(0); } }
+.hn-knallpunkte.mit-hammer:not(.s5) { animation: hnKnall .6s cubic-bezier(.3,1.5,.5,1) both, hnTreffer .5s ease-out .93s; }
+@keyframes hnTreffer { 20% { transform: translate(5px, 4px) rotate(5deg) scale(.95); } 45% { transform: rotate(-3deg) scale(1.03); } 70% { transform: rotate(1.5deg); } }
+/* Stufe 5: der kleine Hammer verfehlt den Stern, fällt links daneben und bleibt neben dem Stern liegen (Phase 4: nichts
+   verdecken, ganz sichtbar). Endlage --fx/--fy/--fr rechnet schirme.js (hammerPlatz) aus Stern, Band und Bildschirmrand. */
+.hn-knallpunkte.s5 .hn-hammer { width: 30%; left: -4%; top: -2%; transform-origin: 50% 50%; animation: hnHammerFaellt 1.25s cubic-bezier(.45,0,.7,.6) .5s both; }
+@keyframes hnHammerFaellt {
+  0% { opacity: 0; transform: rotate(-35deg); } 8% { opacity: 1; }
+  45% { transform: translate(calc(var(--fx, -40px) * .45), calc(var(--fy, 110px) * .5)) rotate(-8deg); }
+  80% { transform: translate(var(--fx, -40px), var(--fy, 110px)) rotate(var(--fr, -55deg)); }
+  90% { transform: translate(var(--fx, -40px), calc(var(--fy, 110px) - 7px)) rotate(calc(var(--fr, -55deg) + 7deg)); }
+  100% { opacity: 1; transform: translate(var(--fx, -40px), var(--fy, 110px)) rotate(var(--fr, -55deg)); }
+}
+@keyframes hnSternDreh { 50% { transform: rotate(6deg) scale(1.03); } }
+.hn-pz { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.hn-punkte { font: 900 62px/0.95 'Figtree', sans-serif; color: var(--haupt); letter-spacing: -.04em; font-variant-numeric: tabular-nums; text-shadow: 3px 3px 0 var(--gelb), 5px 5px 0 var(--tinte); transform: rotate(-4deg); }
+.hn-von { font: 700 12px 'Figtree', sans-serif; color: #555; margin-top: 4px; }
+.hn-ende .hn-karte { padding-top: 22px; }
+.hn-ende .hn-band { font-size: 30px; max-width: 100%; }
+/* lange Bewertung („Nicht hammermäßig“) auf schmalen Bildschirmen einzeilig halten */
+.hn-ende .hn-band.lang { font-size: 27px !important; white-space: nowrap; }
+@media (max-width: 360px) { .hn-ende .hn-band.lang { font-size: 23px !important; letter-spacing: 0; } }
+.hn-plakettenreihe { margin-top: 14px; }
+.hn-plakette { display: inline-flex; align-items: center; gap: 6px; background: var(--gelb); border: 3px solid var(--tinte); border-radius: 30px; padding: 4px 12px; font: 800 13.5px 'Figtree', sans-serif; box-shadow: 3px 3px 0 var(--tinte); animation: hnKnall .45s cubic-bezier(.3,1.5,.5,1) .5s both; }
+.hn-bilanz { font: 600 12.5px 'Figtree', sans-serif; color: #444; margin: 8px 0 0; }
+.hn-band + .hn-bilanz { margin-top: 14px; }
+.hn-auftragzeile { font: 700 12px 'Figtree', sans-serif; margin: 4px 0 0; color: #777; }
+.hn-auftragzeile.ja { color: #2f8a44; }
+.hn-mappe-reihe { display: flex; gap: 4px; width: 100%; justify-content: center; margin: 10px auto 0; padding: 4px; border: 0; background: none; cursor: pointer; border-radius: 8px; }
+.hn-mappe-reihe:hover { background: var(--gelb-hell); }
+.hn-mini { position: relative; width: 26px; height: 26px; flex: 0 1 26px; min-width: 0; aspect-ratio: 1; height: auto; border: 2.5px solid var(--tinte); border-radius: 5px; background: #fff; overflow: hidden; animation: hnHuepf .3s ease calc(.6s + var(--i) * .06s) both; }
+.hn-mini.v::after { content: ""; position: absolute; inset: 7px -4px; background: var(--rot); transform: rotate(-24deg); border-top: 1.5px solid var(--tinte); border-bottom: 1.5px solid var(--tinte); }
+.hn-mini.l { opacity: .75; filter: grayscale(1); }
+.hn-mini.l::after { content: ""; position: absolute; inset: 0; background: linear-gradient(45deg, transparent 45%, #555 45%, #555 55%, transparent 55%); }
+
+/* ---------- kleine Bildschirme ---------- */
+html.kompakt .hn-tag { font-size: 21px; }
+html.kompakt .hn-pinhalt { padding: 2px 11px 6px; }
+html.kompakt .hn-pfuss { padding: 4px 11px 11px; }
+html.kompakt .hn-kn:not(.kunde) { font-size: 21px; padding: 8px 0 6px; }
+html.kompakt .hn-expose-kurz .bild { width: 70px; height: 48px; }
+html.kompakt .hn-expose-kurz dl { font-size: 12px; column-gap: 7px; }
+html.kompakt .hn-hinweistext { display: none; }
+html.kompakt .hn-steck b { font-size: 12.5px; }
+html.kompakt .hn-hb { padding: 3px 6px; font-size: 11.5px; }
+html.kompakt .hn-regler { margin-top: 6px; }
+html.kompakt .hn-preis { font-size: 27px; min-width: 160px; }
+html.kompakt .hn-pm { width: 38px; height: 38px; }
+html.kompakt .hn-eig .fig { width: 58px; height: 58px; }
+html.kompakt .hn-blase { font-size: 13px; padding: 7px 10px; }
+html.kompakt .hn-kk .fig { width: 44px; height: 44px; }
+html.kompakt .hn-kk { padding: 5px 8px; }
+html.kompakt .hn-kk .txt { font-size: 12px; }
+html.kompakt .hn-betrag { font-size: 37px; }
+html.kompakt .hn-bieterreihe { margin-top: 26px; }
+html.kompakt .hn-raum { max-height: calc(100dvh - 300px); }
+html.kompakt .hn-schirm .hn-band { font-size: 28px; }
+html.kompakt .hn-figur-oben { width: 76px; height: 76px; }
+html.kompakt .hn-anl { font-size: 12.5px; margin-top: 8px; }
+html.kompakt .hn-knallpunkte { width: 180px; height: 180px; margin-bottom: -30px; }
+html.kompakt .hn-punkte { font-size: 50px; }
+.hn-punkte.lang { font-size: 48px; }   /* „1.000“ passt sonst nicht in den weißen Stern */
+html.kompakt .hn-punkte.lang { font-size: 39px; }
+html.kompakt .hn-schirm .hn-karte { padding: 13px 13px 11px; }
+html.kompakt .hn-schirm .hn-kn { margin-top: 8px; }
+html.kompakt .hn-hb svg { width: 84px; }
+html.kompakt .hn-hb[data-h="stadtplan"] svg { width: 100px; }
+html.kompakt .hn-rechnung { font-size: 11.5px; }
+html.kompakt .hn-punktliste { font-size: 12.5px; }
+@media (max-width: 389px) {
+  .hn-chip { font-size: 12px; padding: 0 7px; }
+  .hn-hud { gap: 4px; padding: 0 6px; }
+  .hn-laden svg { width: 14px; height: 13px; }
+}
+@media (max-width: 359px) {
+  .hn-chip { font-size: 11.5px; padding: 0 6px; height: 28px; }
+  .hn-objekt .wort { display: none; }
+  .hn-hud { gap: 4px; }
+  .hn-logo { height: 34px; padding: 5px 8px; }
+  #anzeige button, #anzeige a { width: 34px; height: 34px; }
+  .hn-steck { grid-template-columns: 1fr 1fr; }
+  .hn-hw span { font-size: 9.5px; }
+  .hn-schritte li { width: 22px; height: 22px; }
+  .hn-schritte li svg { width: 12px; height: 12px; }
+  .hn-tag { font-size: 19px !important; }
+}
+
+/* ---------- Querformat flach (Handy quer): Kopfzeile in einer Zeile, Tafeln zweispaltig ---------- */
+html.flach .hn-hud { top: calc(10px + env(safe-area-inset-top)); left: 170px; right: 140px; flex-wrap: nowrap; }
+html.flach .hn-buehne { top: calc(54px + env(safe-area-inset-top)); padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+html.flach .hn-panel { width: min(100% - 20px, 760px); }
+html.flach .hn-pkopf { padding: 6px 12px 2px; }
+html.flach .hn-tag { font-size: 19px; padding: 4px 9px 2px; }
+html.flach .hn-pfuss { flex-direction: row; align-items: center; padding: 4px 12px 8px; }
+html.flach .hn-pfuss .hn-kn, html.flach .hn-pfuss .hn-zuschlag { width: auto; flex: 0 0 240px; margin-left: auto; font-size: 19px; padding: 7px 0 5px; }
+html.flach .hn-pfuss .hn-erg { flex: 1; text-align: left; }
+html.flach .hn-s-anruf .hn-pinhalt { display: grid; grid-template-columns: 1.3fr 1fr; gap: 0 14px; align-items: start; }
+html.flach .hn-s-anruf .hn-klingel { grid-column: 1 / -1; margin-bottom: 4px; }
+html.flach .hn-s-anruf .hn-expose-kurz { margin-top: 0; }
+html.flach .hn-s-besichtigung .hn-pinhalt { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto 1fr; gap: 0 12px; }
+html.flach .hn-s-besichtigung .hn-raum { grid-column: 1 / -1; max-height: calc(100dvh - 160px); min-height: 120px; width: auto; height: calc(100dvh - 160px); aspect-ratio: 4 / 3; }
+html.flach .hn-s-besichtigung .hn-uhr { grid-column: 1 / -1; margin: 3px 0 4px; }
+html.flach .hn-s-schaetzen .hn-pinhalt { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; align-content: start; }
+html.flach .hn-s-schaetzen .hn-pinhalt > * { grid-column: 1; }
+html.flach .hn-s-schaetzen .hn-regler, html.flach .hn-s-schaetzen .hn-aufloesung { grid-column: 2; grid-row: 1 / span 3; margin-top: 0; }
+html.flach .hn-s-schaetzen .hn-hinweisbild { grid-column: 2; grid-row: 4 / span 2; }
+html.flach .hn-s-schaetzen .hn-hinweistext { grid-column: 1 / -1; }
+html.flach .hn-steck b { font-size: 12.5px; }
+html.flach .hn-kaeufer { flex-direction: row; }
+html.flach .hn-kk { flex: 1; flex-direction: column; text-align: center; align-items: center; padding: 6px; }
+html.flach .hn-kk .fig { width: 40px; height: 40px; }
+html.flach .hn-frage-zeile { margin: 5px 0 4px; }
+html.flach .hn-s-bieter .hn-pinhalt { display: grid; grid-template-columns: 1fr 1.2fr; align-items: center; }
+html.flach .hn-s-bieter .hn-bieterhinweis { grid-column: 1 / -1; }
+html.flach .hn-bieterreihe { margin-top: 26px; }
+html.flach .hn-betrag { font-size: 36px; }
+html.flach .hn-s-expose .hn-pinhalt { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; align-content: start; }
+html.flach .hn-s-expose .hn-expo-gross, html.flach .hn-s-expose .hn-provzeile { grid-column: 1; }
+html.flach .hn-s-expose .hn-rechnung { grid-column: 2; grid-row: 1 / span 3; margin-top: 0; }
+html.flach .hn-s-expose .hn-punktliste { grid-column: 1; }
+html.flach .hn-sprecher .fig { width: 46px; height: 46px; }
+html.flach .hn-sprecher .blase { font-size: 12px; margin-bottom: 20px; }
+html.flach .hn-schirm { padding-top: calc(54px + env(safe-area-inset-top)); }
+html.flach .hn-mitte { max-width: 640px; flex-direction: row; align-items: center; gap: 14px; }
+html.flach .hn-start .hn-figur-oben { margin: 0; flex: none; }
+html.flach .hn-knallpunkte { margin: 0; flex: none; width: 190px; height: 190px; }
+html.flach .hn-schirm .hn-karte { flex: 1; padding: 11px 13px 9px; }
+html.flach .hn-schirm .hn-band { font-size: 26px; }
+html.flach .hn-frage { margin-top: 10px; }
+html.flach .hn-anl { margin-top: 6px; font-size: 12.5px; line-height: 1.36; }
+html.flach .hn-best { margin-top: 7px; }
+html.flach .hn-schirm .hn-kn { margin-top: 6px; font-size: 19px; padding: 6px 0 4px; }
+html.flach .hn-schirm .hn-kn.kunde { font-size: 13.5px; padding: 7px 0; }
+html.flach .hn-start .hn-kn.haupt + .hn-kn.neben { margin-top: 6px; }
+html.flach .hn-plakettenreihe { margin-top: 8px; }
+html.flach .hn-mappe-reihe { margin-top: 4px; max-width: 320px; }
+html.flach .hn-von { font-size: 10.5px; }
+html.flach .hn-hb svg { width: 84px; }
+html.flach .hn-hb[data-h="stadtplan"] svg { width: 100px; }
+
+
+/* ---------- Phase 2 (26.10.2026): Texte des Text Writers, Rundgang, Käufer-Profile, Bilder statt Zeichnung ---------- */
+.fig img, .hn-figur-oben img, .hn-sprecher .fig img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.bild img, .hn-mini img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.hn-anleitung { font-size: 12px; color: #555; margin: 8px 0 0; line-height: 1.35; }
+.hn-anleitung.klein { margin: 6px 0 0; font-size: 11.5px; }
+.hn-ek-text { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.hn-titel { font-size: 14px; font-weight: 900; color: var(--haupt); line-height: 1.2; }
+.hn-expose-kurz { align-items: flex-start; }
+/* Besichtigung: Reiter je Raum */
+.hn-reiter-reihe { display: flex; gap: 5px; margin: 0 0 6px; overflow-x: auto; scrollbar-width: none; }
+.hn-reiter-reihe::-webkit-scrollbar { display: none; }
+.hn-rr { flex: 0 0 auto; font: 800 12.5px 'Figtree', sans-serif; padding: 4px 10px; border: 2.5px solid var(--tinte); border-radius: 10px 10px 4px 4px; background: #fff; color: var(--tinte); cursor: pointer; transition: background-color .2s, transform .15s; }
+.hn-rr.an { background: var(--gelb); transform: translateY(-1px); box-shadow: 2px 2px 0 var(--tinte); }
+.hn-rr.fertig::after { content: " ✓"; color: #2f8a44; }
+.hn-rr.offen { border-style: dashed; }
+.hn-reiter-reihe.eins .hn-rr { cursor: default; }
+.hn-rueck { min-height: 2.7em; margin: 6px 0 0; font-size: 12.5px; line-height: 1.35; color: #333; }
+.hn-rueck.neu { animation: hnHuepf .3s ease both; }
+/* Schätzen: Steckbrief mit Zustand und Hofgrund */
+.hn-steck { grid-template-columns: repeat(6, 1fr); }
+.hn-steck > div[data-h="grundriss"] { grid-column: span 2; }
+.hn-steck > div.zustand { grid-column: span 3; }
+.hn-steck > div[data-h="baujahr"], .hn-steck > div[data-h="energie"] { grid-column: span 3; }
+.hn-steck.mithof > div[data-h="baujahr"], .hn-steck.mithof > div[data-h="energie"], .hn-steck.mithof > div.hof { grid-column: span 2; }
+.hn-steck.grund { grid-template-columns: 1fr 2fr; }
+.hn-steck.grund > div { grid-column: auto !important; }
+.hn-steck > div.breit b { white-space: normal; overflow-wrap: anywhere; }
+.hn-mchip.neu { border-style: dashed; }
+.hn-mchip.markt { white-space: normal; text-align: left; }
+.hn-hb span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hn-hb span i { font-style: normal; font-weight: 500; font-size: 11.5px; color: #555; line-height: 1.3; }
+.hn-stufe { display: inline-block; margin-top: 6px; font: 400 22px/1 'Bangers', sans-serif; letter-spacing: 1.5px; color: #fff; background: var(--haupt); border: 2.5px solid var(--tinte); padding: 4px 10px 2px; transform: rotate(-3deg); box-shadow: 3px 3px 0 var(--tinte); text-transform: uppercase; animation: hnStempel .35s cubic-bezier(.3,1.6,.5,1) both; }
+.hn-stufentext { margin: 6px 0 0; font-size: 13px; font-weight: 600; color: #333; }
+/* Käufer-Karten mit Profil */
+.hn-kk .txt { min-width: 0; }
+.hn-kk .zitat { color: #444; font-style: italic; }
+.hn-kchips { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; font-size: 11.5px; }
+.hn-kn-zeile { display: block; font-size: 11.5px; line-height: 1.35; }
+.hn-kk .zitat { font-size: 11.5px; line-height: 1.3; }
+.hn-kk { padding: 6px 9px; gap: 8px; }
+.hn-kk .fig { width: 48px; height: 48px; }
+.hn-steck > div.zustand b { white-space: normal; overflow: visible; line-height: 1.15; }
+.hn-bp { flex: 1 1 0; min-width: 0; max-width: 92px; }
+.hn-bp b { display: block; overflow-wrap: anywhere; line-height: 1.2; }
+.hn-kchips i, .hn-kn-zeile i { font-style: normal; font-weight: 800; color: #555; margin-right: 1px; }
+.hn-kc { padding: 0 6px; border: 1.5px solid var(--tinte); border-radius: 8px; background: var(--haupt-blass); font-weight: 700; line-height: 1.45; }
+.hn-kc.wunsch { background: #fff3c4; }
+.hn-kn-zeile { color: #b2352d; font-weight: 700; }
+.hn-kk .budget.zuwenig, .hn-kk .scheitert { background: #ffb3aa; border-radius: 6px; outline: 2px solid var(--rot); }
+.hn-kk .budget.zuwenig { padding: 0 4px; }
+.hn-tchip.leer { color: #666; background: #fff; }
+.hn-objzeile > div { min-width: 0; }
+/* Exposé */
+.hn-expo-gross .daten { min-width: 0; }
+.hn-expo-gross .daten .art { color: #555; font-weight: 700; }
+.hn-beschreibung { margin: 8px 0 0; font-size: 12.5px; font-style: italic; color: #444; line-height: 1.35; }
+.hn-verschwiegen { margin: 6px 0 0; font-size: 12.5px; padding: 3px 8px; border: 2px dashed var(--rot); border-radius: 8px; color: #8a2a24; }
+.hn-verschwiegen.ja { border-color: #2f9a4a; color: #2f6a3a; }
+/* Kopfzeile, Sprecher, Zeitung, Endbild */
+.hn-auftrag.nein { background: #6a6f78; }
+.hn-sprecher .blase .name { display: block; font-size: 10.5px; font-weight: 900; color: #8a2f6a; text-transform: uppercase; letter-spacing: .06em; }
+.hn-meldung { display: inline-block; font: 800 10.5px 'Figtree', sans-serif; text-transform: uppercase; letter-spacing: .08em; background: var(--rot); color: #fff; border: 2px solid var(--tinte); border-radius: 6px; padding: 1px 6px; }
+.hn-abschluss { margin: 6px 0 0 !important; font-size: 12.5px !important; color: #333 !important; }
+.hn-einladung { margin: 10px 0 -2px; font-size: 12.5px; font-weight: 600; color: #333; }
+html.kompakt .hn-kk .zitat { display: none; }
+html.kompakt .hn-anleitung { font-size: 11px; }
+html.kompakt .hn-rueck { font-size: 11.5px; min-height: 2.5em; }
+html.kompakt .hn-beschreibung { font-size: 11.5px; }
+html.kompakt .hn-einladung { font-size: 11.5px; margin-top: 7px; }
+html.flach .hn-kk .zitat { display: none; }
+html.flach .hn-s-besichtigung .hn-pinhalt { grid-template-columns: auto 1fr; grid-template-rows: auto auto auto 1fr; }
+html.flach .hn-s-besichtigung .hn-raum { grid-column: 1; grid-row: 3 / span 2; height: calc(100dvh - 160px); max-height: calc(100dvh - 160px); }
+html.flach .hn-s-besichtigung .hn-reiter-reihe { grid-column: 2; grid-row: 3; flex-direction: column; align-items: flex-start; margin: 0; overflow: visible; }
+html.flach .hn-s-besichtigung .hn-rueck { grid-column: 2; grid-row: 4; min-height: 0; margin-top: 8px; }
+html.flach .hn-kk .fig { display: none; }
+html.flach .hn-kk { text-align: left; align-items: stretch; }
+html.flach .hn-kk .txt { font-size: 11.5px; }
+html.flach .hn-kk .hn-kchips, html.flach .hn-kk .hn-kn-zeile { justify-content: flex-start; font-size: 11px; }
+html.flach .hn-s-expose .hn-beschreibung, html.flach .hn-s-expose .hn-verschwiegen { grid-column: 1; }
+
+.hn-pkopf .hn-tag { white-space: nowrap; flex: none; }
+.hn-pkopf .hn-tag.lang { font-size: 20px; }
+html.kompakt .hn-pkopf .hn-tag.lang { font-size: 19px; }
+@media (max-width: 389px) { .hn-pkopf .hn-tag.lang { font-size: 18px; } }
+@media (max-width: 359px) { .hn-pkopf .hn-tag.lang { font-size: 15.5px !important; padding: 4px 8px 2px; } }
+html.flach .hn-pkopf .hn-tag.lang { font-size: 18px; }
+
+@media (max-width: 419px) {
+  .hn-steck > div[data-h="grundriss"] { grid-column: span 3; }
+  .hn-steck > div:not([data-h]):not(.zustand):not(.hof) { grid-column: span 3; }
+  .hn-steck > div.zustand { grid-column: span 6; }
+}
+
+/* ---------- Korrekturrunde 1 (27.10.2026) ---------- */
+/* Sprechblasen verdecken nie Knöpfe/Rückmeldungen: im Hochformat endet die Bühne über einem freien Streifen für die Blasen;
+   auf breiten Bildschirmen stehen sie neben der Tafel (html.seitlich); quer flach in der Kopfzeile der Tafel (schirme.js). */
+html.hn-imspiel:not(.flach):not(.seitlich) .hn-buehne { bottom: 86px; }
+html.hn-imspiel:not(.flach):not(.seitlich) .hn-raum { max-height: calc(100dvh - 414px); }
+html.hn-imspiel.kompakt:not(.flach):not(.seitlich) .hn-raum { max-height: calc(100dvh - 392px); min-height: 150px; }
+.hn-sprecher { bottom: calc(6px + env(safe-area-inset-bottom)); max-width: calc(100vw - 16px); }
+.hn-sprecher .fig { width: 54px; height: 54px; }
+.hn-sprecher .blase { margin-bottom: 6px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; max-height: 74px; }
+.hn-sprecher.konkurrenz .blase { -webkit-line-clamp: 4; max-height: 76px; font-size: 12.5px; line-height: 1.25; }
+html.seitlich .hn-sprecher { max-width: min(var(--seite, 330px), 360px); bottom: calc(16px + env(safe-area-inset-bottom)); }
+html.seitlich .hn-sprecher .fig { width: 66px; height: 66px; }
+html.seitlich .hn-sprecher .blase { margin-bottom: 26px; -webkit-line-clamp: 5; max-height: none; }
+/* quer flach: Blase in der Kopfzeile der Tafel */
+.hn-kopfsprecher { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 4px; margin: 0 4px; animation: hnHuepf .3s ease both; transition: opacity .25s; }
+.hn-kopfsprecher.konkurrenz { flex-direction: row-reverse; }
+.hn-kopfsprecher.weg { opacity: 0; }
+.hn-kopfsprecher .fig { width: 34px; height: 34px; flex: none; }
+.hn-kopfsprecher .fig svg, .hn-kopfsprecher .fig img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.hn-kopfsprecher .blase { min-width: 0; background: #fff; border: 2px solid var(--tinte); border-radius: 11px; padding: 3px 8px; font-size: 11.5px; font-weight: 700; line-height: 1.22; box-shadow: 2px 2px 0 var(--tinte); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.hn-kopfsprecher.konkurrenz .blase { background: #f3e1ef; }
+.hn-kopfsprecher .blase .name { display: inline; font-size: 9.5px; font-weight: 900; color: #8a2f6a; text-transform: uppercase; letter-spacing: .05em; margin-right: 4px; }
+html.flach .hn-pkopf .hn-schritte, html.flach .hn-spiegel { flex: none; }
+/* quer flach „Der Preis“: Hinweis-Kacheln rechts unter den Regler (links waren sie unten angeschnitten, QA S3) */
+html.flach .hn-s-schaetzen .hn-regler { grid-row: 1 / span 2; }
+html.flach .hn-s-schaetzen .hn-hinweise { grid-column: 2; grid-row: 3; margin-top: 6px; }
+html.flach .hn-s-schaetzen .hn-hinweisbild { grid-column: 2; grid-row: 4 / span 3; }
+html.flach .hn-s-schaetzen .hn-aufloesung { grid-row: 1 / span 2; }
+html.flach .hn-s-schaetzen .hn-hw { flex-direction: row; justify-content: center; gap: 4px; padding: 5px 2px; }
+html.flach .hn-s-schaetzen .hn-hw svg { width: 16px; height: 16px; }
+
+/* Besichtigung vorbei: Anleitung und Uhr ausblenden, damit Rückmeldung und Knopf ohne Scrollen passen */
+.hn-s-besichtigung.vorbei .hn-bes-text, .hn-s-besichtigung.vorbei .hn-uhr { display: none; }
+.hn-s-besichtigung.vorbei .hn-bes-kopf { justify-content: flex-end; margin-bottom: 4px; }
+html.flach .hn-s-besichtigung.vorbei .hn-raum { height: calc(100dvh - 205px); max-height: calc(100dvh - 205px); }
+
+/* Scroll-Hinweis: Inhalt der Tafel geht unten weiter (z. B. dritter Käufer) */
+.hn-mehr { position: relative; height: 0; flex: none; z-index: 2; pointer-events: none; }
+.hn-mehr::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: linear-gradient(rgba(255,255,255,0), #fff 85%); opacity: 0; transition: opacity .25s; }
+.hn-mehr span { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  font: 800 12px 'Figtree', sans-serif; background: var(--gelb); border: 2px solid var(--tinte); border-radius: 12px; padding: 2px 10px 2px 8px; box-shadow: 2px 2px 0 var(--tinte);
+  opacity: 0; transition: opacity .25s; }
+.hn-mehr span::before { content: ""; width: 7px; height: 7px; border-right: 2.5px solid var(--tinte); border-bottom: 2.5px solid var(--tinte); transform: translateY(-2px) rotate(45deg); }
+.hn-panel.mehr .hn-mehr::before, .hn-panel.mehr .hn-mehr span { opacity: 1; }
+.hn-panel.mehr .hn-mehr span { animation: hnMehr 1.4s ease-in-out infinite; }
+@keyframes hnMehr { 50% { transform: translateX(-50%) translateY(2px); } }
+
+/* Käufer: kompakter und besser lesbar (Spieler bis ca. 75 Jahre) – Schrift größer, kaum Grau, nichts kursiv */
+.hn-kk { padding: 6px 9px; }
+.hn-kk .txt { font-size: 13px; line-height: 1.3; gap: 2px; color: var(--tinte); }
+.hn-kk .txt b { font-size: 15px; }
+.hn-kk .zitat { display: none; font-style: normal; color: #333; font-size: 12.5px; }
+html.seitlich .hn-kk .zitat { display: block; }
+.hn-kchips { font-size: 12.5px; gap: 3px; }
+.hn-kchips i, .hn-kn-zeile i { color: var(--tinte); font-weight: 900; }
+.hn-kc { font-weight: 800; line-height: 1.4; }
+.hn-kn-zeile { font-size: 12.5px; color: #a8261f; font-weight: 800; }
+.hn-kk .budget { font-size: 14px; }
+.hn-kz { display: block; font-size: 13px; line-height: 1.3; font-weight: 700; }
+.hn-kz i { font-style: normal; font-weight: 900; margin-right: 2px; }
+.hn-kz.nie { color: #a8261f; }
+.hn-kz [data-k], .hn-kz.nie > span { font-weight: 700; }
+.hn-kk .scheitert { padding: 0 3px; }
+.hn-kk .fig { width: 44px; height: 44px; }
+html.kompakt .hn-kz { font-size: 12.5px; }
+html.flach .hn-kz { font-size: 12.5px; }
+.hn-kk[disabled] { opacity: .75; }
+.hn-objzeile b { font-size: 15px; }
+.hn-s-kaeufer .hn-pinhalt { padding-top: 8px; }
+html.kompakt .hn-kk .txt { font-size: 12.5px; }
+html.flach .hn-kk .txt { font-size: 12px; }
+html.flach .hn-kk .hn-kchips, html.flach .hn-kk .hn-kn-zeile { font-size: 11.5px; }
+
+/* Bieterrunde: Satz, was gefehlt hat (bzw. was gut war) */
+.hn-erg-satz { margin: -2px 0 0; text-align: center; font-size: 13px; font-weight: 600; line-height: 1.3; color: #333; }
+.hn-erg-satz.frueh, .hn-erg-satz.spaet { color: #a8261f; }
+html.flach .hn-pfuss .hn-erg-satz { display: none; }
+html.flach .hn-pfuss:has(.hn-erg-satz) .hn-erg { font-size: 13px; }
+/* Erklärung vor der ersten Bieterrunde */
+.hn-einbl-karte.bieter-erkl { background: var(--gelb-hell); width: min(100%, 400px); }
+.hn-erkl-buehne { width: 100%; background: #fff; border: 2.5px solid var(--tinte); border-radius: 12px; padding: 34px 10px 10px; }
+.hn-erkl-buehne .hn-bieterreihe { margin-top: 0; }
+.hn-erkl-buehne .hn-bp .fig { width: 56px; height: 56px; animation: hnZittern .25s linear infinite; }
+.hn-erkl-buehne .hn-zuschlag { margin-top: 8px; padding: 8px 0 6px; font-size: 26px; cursor: default; animation: hnPuls .4s ease-in-out infinite; pointer-events: none; }
+.hn-erkl-buehne .hn-zuschlag svg { width: 24px; height: 24px; }
+.hn-erkl-text { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.38; }
+.hn-erkl-text.tipp { font-weight: 800; }
+html.flach .hn-einbl-karte.bieter-erkl { width: min(100%, 640px); display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; text-align: left; }
+html.flach .hn-einbl-karte.bieter-erkl > .hn-tag { grid-column: 1 / -1; justify-self: center; }
+html.flach .hn-einbl-karte.bieter-erkl .hn-erkl-buehne { grid-row: 2 / span 3; padding-top: 30px; }
+html.flach .hn-einbl-karte.bieter-erkl .hn-kn { grid-column: 2; }
+
+/* Verkauf unter Wert: eigene Farbe (Orange), unterscheidbar von „Verkauft“ und „Ladenhüter“ */
+.hn-stempel.unterwert { color: #c25a00; border-color: #c25a00; }
+.hn-stempel.gross { margin-bottom: 8px; }
+.hn-stempel.gross.unterwert { font-size: 25px; transform: rotate(-5deg); margin: 8px 0 6px; animation-name: hnStempelFlach; }
+@keyframes hnStempelFlach { from { opacity: 0; transform: rotate(-5deg) scale(2); } }
+.hn-einbl-karte.bieter-erkl > .hn-tag { font-size: 21px; }
+.hn-s-expose.unterwert .hn-tag { background: #d9730d; }
+.hn-expo.unterwert .bild .hn-stempel { font-size: 12px; }
+
+/* Endbild-Häuserleiste: Plakette in der Ecke statt Querbalken (der wirkte wie Durchstreichen) */
+.hn-mini.v::after, .hn-mini.u::after { content: "✓"; position: absolute; inset: auto -1px -1px auto; width: 13px; height: 13px; border-radius: 50%; background: #2f9a4a; color: #fff;
+  border: 1.5px solid var(--tinte); font: 900 8.5px/11px 'Figtree', sans-serif; text-align: center; transform: none; }
+.hn-mini.u::after { content: "↓"; background: #d9730d; }
+
+/* Antippen ohne Doppeltipp-Zoom-Verzögerung (Touch) */
+.hn-kn, .hn-kk, .hn-hw, .hn-rr, .hn-spiegel, .hn-mappe-reihe, .hn-einblendung { touch-action: manipulation; }
+
+/* Startbild: Frage einzeilig (Schrift passt sich an, schirme.js) */
+.hn-frage .hn-blase { white-space: nowrap; max-width: 100%; }
+
+/* ---------- Korrekturrunde 2 (27.10.2026) ---------- */
+/* Weiter-Knopf an fester Stelle: die Tafel ist im Spiel immer gleich hoch (ganze Bühne, auf großen Bildschirmen höchstens
+   720 px), der Fuß mit dem Knopf steht damit immer am selben Platz unten; der Inhalt scrollt darüber */
+html.hn-imspiel .hn-panel { height: min(100%, 720px); }
+html.hn-imspiel.seitlich:not(.flach) .hn-panel { height: min(100%, 640px); }   /* großer Bildschirm: weniger Leerraum */
+/* Bieterrunde: Gebot und Bieter in der Mitte der (jetzt hohen) Tafel statt oben mit Loch darunter */
+html:not(.flach) .hn-s-bieter .hn-pinhalt { display: flex; flex-direction: column; justify-content: center; padding-bottom: 24px; }
+html.hn-imspiel .hn-pfuss { margin-top: auto; }
+
+/* Schätzen: Preis und Regler im Fuß über „Preis festlegen“ (immer sichtbar, nie unter „Weiter unten“) */
+.hn-pfuss .hn-regler { margin-top: 0; padding-top: 6px; border-top: 2px dashed rgba(22,24,29,.25); }
+.hn-pfuss .hn-skala { margin-bottom: 2px; }
+html.kompakt .hn-pfuss .hn-regler { padding-top: 4px; }
+html.kompakt .hn-pfuss .hn-schiene input { height: 30px; }
+html.kompakt .hn-pfuss .hn-preiszeile { gap: 8px; }
+html.flach .hn-s-schaetzen .hn-pfuss .hn-regler { flex: 1; min-width: 0; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 12px; align-items: center; padding-top: 0; border-top: 0; grid-column: auto; grid-row: auto; }
+html.flach .hn-s-schaetzen .hn-pfuss .hn-preiszeile { grid-row: 1 / span 2; gap: 6px; }
+html.flach .hn-s-schaetzen .hn-pfuss .hn-preis { font-size: 24px; min-width: 132px; }
+html.flach .hn-s-schaetzen .hn-pfuss .hn-pm { width: 34px; height: 34px; font-size: 20px; }
+html.flach .hn-s-schaetzen .hn-pfuss .hn-schiene { margin-top: 0; }
+html.flach .hn-s-schaetzen .hn-pfuss .hn-schiene input { height: 28px; }
+html.flach .hn-s-schaetzen .hn-pfuss .hn-kn { flex: 0 0 200px; }
+html.flach .hn-s-schaetzen .hn-hinweise { grid-column: 2; grid-row: 1; margin-top: 0; }
+html.flach .hn-s-schaetzen .hn-hinweisbild { grid-column: 2; grid-row: 2 / span 4; }
+html.flach .hn-s-schaetzen .hn-aufloesung { grid-column: 2; grid-row: 1 / span 5; }
+html.flach .hn-s-schaetzen.aufgeloest .hn-hinweise, html.flach .hn-s-schaetzen.aufgeloest .hn-hinweisbild { display: none; }
+@media (max-width: 359px) { .hn-pfuss .hn-preis { font-size: 25px; min-width: 140px; } .hn-pfuss .hn-pm { width: 36px; height: 36px; } }
+
+/* Ladenhüter-Anzeige pulsiert nach dem vorletzten Ladenhüter (Abbruch angekündigt) */
+.hn-laden.warnung { background: #ffd0cb; animation: hnWarnPuls 1.1s ease-in-out infinite; }
+.hn-laden.warnung.wackeln { animation: hnWackeln .45s ease, hnWarnPuls 1.1s ease-in-out .45s infinite; }
+@keyframes hnWarnPuls { 50% { transform: scale(1.12); box-shadow: 0 0 0 4px rgba(232,69,60,.45), 2px 2px 0 var(--tinte); } }
+.hn-einbl-karte.warnung { background: #fff1ef; }
+.hn-einbl-karte.warnung > .hn-tag { background: var(--rot); }
+.hn-warnhaeuser { display: flex; gap: 8px; justify-content: center; margin: 4px 0 0; }
+.hn-warnhaeuser svg { width: 40px; height: 36px; fill: #fff; stroke: var(--tinte); stroke-width: 1.8; stroke-linejoin: round; }
+.hn-warnhaeuser svg.an { fill: var(--rot); }
+.hn-warnhaeuser svg.frei { animation: hnWarnPuls 1.1s ease-in-out infinite; stroke-dasharray: 3 2; }
+
+/* Rückfrage beim Haus-Knopf: kleine Comic-Tafel über allem */
+.hn-rueckfrage { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(22,24,29,.45); animation: hnDunkel .2s ease both; touch-action: manipulation; }
+.hn-rueckfrage[hidden] { display: none; }
+.hn-rf-karte { width: min(100%, 330px); gap: 6px; }
+.hn-rf-karte .hn-tag { font-size: 22px; white-space: normal; line-height: 1.05; }
+.hn-rf-text { margin: 6px 0 2px; font-size: 15px; font-weight: 700; }
+.hn-rf-karte .hn-kn.neben { margin-top: 2px; font-size: 20px; padding: 8px 0 6px; }
+
+/* Verkauf unter Wert: halbe Provision deutlich */
+.hn-provzeile.halb { background: #ffe1c4; }
+.hn-provhalb { margin: 4px 0 0; text-align: center; font-size: 12px; font-weight: 800; color: #a14a00; }
+
+/* Exposé „So kommt der Preis zustande“: luftiger und besser lesbar – Zeilen im Wechsel hinterlegt, Prozente als feste
+   rechte Spalte (gleich breit, Ziffern untereinander), etwas mehr Zeilenhöhe; Abstände drumherum dafür knapper */
+.hn-rechnung { padding: 5px 8px 6px; font-size: 13px; }
+.hn-rechnung ul { margin-top: 5px; }
+.hn-rechnung li { align-items: baseline; padding: 1px 6px; line-height: 1.28; border-radius: 5px; }
+.hn-rechnung li:nth-child(odd):not(.summe) { background: rgba(255,255,255,.85); }
+.hn-rechnung li b { flex: none; min-width: 58px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 800; }
+.hn-rechnung li.summe { padding: 4px 6px 0; border-radius: 0; }
+.hn-beschreibung { margin-top: 6px; }
+.hn-punktliste { margin-top: 8px; }
+html.kompakt .hn-rechnung { font-size: 12.5px; }
+html.kompakt .hn-rechnung li { padding: 1px 5px; line-height: 1.22; }
+
+/* ---------- Bewegung reduzieren ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
