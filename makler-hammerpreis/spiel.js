@@ -655,7 +655,7 @@
     window.HN_MUSTER_MAPPE = muster;
     SCH.knoepfe({ los() {}, nochmal() { location.hash = ''; location.reload(); }, mappe() { SCH.mappe(muster.filter(m => m.art)); } });
   } else {
-    SCH.start({ best: HB.best() || 0, frage: zufall(T.fragen) });
+    SCH.start({ best: HB.best() || 0 });   // Frage: immer START_FRAGE_1 bzw. kunde.js texte.frage (schirme.js startFrage)
     if (OPT.los || OPT.objekt != null || OPT.schritt || OPT.obj != null) setTimeout(() => document.getElementById('losKnopf').click(), 60);
   }
 

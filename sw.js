@@ -4,7 +4,8 @@
 // Beim ersten Besuch wird das Gerüst (Startseite + Spiel) vorab abgelegt, damit das Spiel auch offline startet.
 // Bei Änderungen an dieser Datei VERSION erhöhen – alte Zwischenspeicher dieser Sammlung (Präfix „hammerpreis-“) werden gelöscht.
 const PREFIX = 'hammerpreis-';
-const VERSION = PREFIX + 'v11';  // v11: Hüpfer/Ring nur so groß, wie um den Knopf Platz ist (knopfPlatz), mehr Luft über roten Knöpfen,
+const VERSION = PREFIX + 'v12';  // v12: Startbild nur noch eine Frage auf allen Geräten („Bekommst du den Zuschlag?“).
+                                 // v11: Hüpfer/Ring nur so groß, wie um den Knopf Platz ist (knopfPlatz), mehr Luft über roten Knöpfen,
                                  //      Hover nur mit Maus, Sprechblasen nach Textlänge, Benno stellt sich vor, Besichtigung ohne Auto-Wechsel/-Ende.
                                  // v10: Knall-Stern „DEAL?“ als <div> mit ruhendem SVG + HTML-Schrift (Schrift pulsiert am Handy mit),
                                  //      rote Knöpfe „Gummi-Hüpfer“ (Erscheinen, Hüpfer alle 2,2s, Ring; Tipp in der Ruhelage zählt),

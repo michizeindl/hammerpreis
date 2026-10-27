@@ -4954,9 +4954,7 @@ window.HN_TEXTE = {
  "rahmen": {
   "START_ANLEITUNG": "Zehn Objekte insgesamt. Wechselnde Tagesaufträge. Eigentümer anhören, besichtigen, Preis schätzen. Den optimalen Käufer wählen, zum besten Preis verkaufen. Bei drei Ladenhütern fällt der Hammer.",
   "START_FRAGE": [
-   "Wann gibt es den Zuschlag?",
-   "Wie gut kennst du den Preis eines Hauses?",
-   "Triffst du den Hammerpreis – oder liegst du weit daneben?"
+   "Bekommst du den Zuschlag?"
   ],
   "SCHRITT": [
    {

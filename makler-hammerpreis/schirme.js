@@ -105,7 +105,7 @@
       <div class="hn-figur-oben">${F.svg(fig, 'freut')}</div>
       <div class="hn-karte">
         <h1 class="hn-band">${esc(K.texte && K.texte.titel || T.titel)}</h1>
-        <div class="hn-frage"><span class="hn-blase">${esc(K.texte && K.texte.frage || o.frage || T.fragen[0])}</span></div>
+        <div class="hn-frage"><span class="hn-blase">${esc(startFrage())}</span></div>
         <p class="hn-anl">${esc(K.texte && K.texte.anleitung || T.anleitung)}</p>
         <div class="hn-best">${esc(T.ui.score)} <b>${HB.zahl(o.best || 0)}/1.000</b> Punkte</div>
         <button class="hn-kn haupt" type="button" data-aktion="los">Los geht’s</button>
@@ -117,27 +117,16 @@
     frageEinpassen();
     if (window.HN_KLANG) window.HN_KLANG.szene('start');   // Musik der Sammlung im Startbild
   }
-  // Startbild-Frage immer einzeilig (QA S3): Schrift so weit verkleinern, dass sie in die Karte passt (bis 12,5 px). Passt die
-  // gewählte Frage selbst dann nicht (z. B. 320 px), nimmt das Startbild eine kürzere der Varianten; zur Not 11 px.
-  let frageWahl = null;
+  // Startbild-Frage (MZ, 27.10.2026, v12): auf allen Geräten dieselbe eine Frage (START_FRAGE_1); eigene Frage des Kunden
+  // (kunde.js texte.frage) hat Vorrang. Immer einzeilig (QA S3): Schrift so weit verkleinern, dass sie in die Karte passt (mind. 11 px).
+  function startFrage() { return K.texte && K.texte.frage || T.fragen[0]; }
   function frageEinpassen() {
     const b = start.querySelector('.hn-frage .hn-blase');
     if (!b || start.hidden) return;
-    const eigene = K.texte && K.texte.frage;
-    if (frageWahl == null) frageWahl = b.textContent;
-    const kandidaten = eigene ? [eigene] : [frageWahl].concat(T.fragen.filter(f => f !== frageWahl).sort((x, y) => x.length - y.length));
-    const passend = text => {
-      b.textContent = text; b.style.fontSize = '';
-      const cs = getComputedStyle(b), rand = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-      const platz = b.parentNode.clientWidth - rand - 8, breite = b.scrollWidth - rand;
-      return breite <= platz ? parseFloat(cs.fontSize) : parseFloat(cs.fontSize) * platz / breite - 0.2;
-    };
-    for (const text of kandidaten) {
-      const gr = passend(text);
-      if (gr >= 12.5) { b.style.fontSize = gr.toFixed(1) + 'px'; return; }
-    }
-    const kurz = kandidaten.slice().sort((x, y) => x.length - y.length)[0];
-    b.style.fontSize = Math.max(11, passend(kurz)).toFixed(1) + 'px';
+    b.style.fontSize = '';
+    const cs = getComputedStyle(b), rand = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const platz = b.parentNode.clientWidth - rand - 8, breite = b.scrollWidth - rand;
+    if (breite > platz) b.style.fontSize = Math.max(11, parseFloat(cs.fontSize) * platz / breite - 0.2).toFixed(1) + 'px';
   }
   addEventListener('resize', frageEinpassen);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(frageEinpassen);
