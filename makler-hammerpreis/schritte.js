@@ -161,12 +161,9 @@
         rueck.classList.remove('neu'); void rueck.offsetWidth; rueck.classList.add('neu');
         KL.ton('fund');
         if (best.id === ob.verschwiegen) bonusZeigen(window.HN_SPIEL.verschwiegenGefunden(ob));
+        // Raum fertig: Reiter bekommt ✓. Kein automatischer Raumwechsel und kein automatisches Ende mehr, auch wenn alles
+        // gefunden ist (MZ, v11) – der Spieler wechselt selbst über die Reiter und tippt auf „Zur Schätzung“ (Zähler zeigt z. B. 3/3).
         if (raumFertig(st.raum) && reiter[st.raum]) reiter[st.raum].classList.add('fertig');
-        if (st.gefunden.length === alle.length) { beenden(); return; }
-        if (raumFertig(st.raum)) {   // nächster offener Raum
-          const n = raeume.findIndex((rr, i) => i !== st.raum && !raumFertig(i));
-          if (n >= 0) { clearTimeout(st.wechsel); st.wechsel = setTimeout(() => { if (!st.vorbei) raumZeigen(n); }, 1000); }
-        }
       } else if (!best) {
         st.fehl++; st.tipps.push({ x, y, t: performance.now() });
         KL.ton('fehltipp'); window.Rahmen.vibrieren(40);
@@ -186,14 +183,16 @@
     }
     // „Zur Schätzung“ steht während der ganzen Besichtigung bereit (MZ, Balancing-Runde 1): früh tippen beendet die Besichtigung,
     // Nichtgefundenes zählt als verpasst und wird kurz gezeigt (gestrichelt im aktuellen Raum, Reiter gestrichelt), dann geht es
-    // von selbst weiter. Nach Ablauf der Zeit bzw. wenn alles gefunden ist, bleibt der Knopf stehen (wie bisher).
+    // von selbst weiter. Ist schon alles gefunden (v11: Besichtigung endet dann nicht mehr von selbst), kurz „Alles gefunden +…“
+    // zeigen und weiter. Nach Ablauf der Zeit bleibt der Knopf stehen (wie bisher).
     let ergebnis = null;
     const ergZeile = el('p', 'hn-erg leer');
     t.fuss.append(ergZeile);
     t.fuss.append(knopf('Zur Schätzung', 'haupt', () => {
       if (st.vorbei) { fertig(ergebnis); return; }
-      beenden(true);
-      setTimeout(() => { if (t.p.isConnected) fertig(ergebnis); }, 1800);
+      const alles = st.gefunden.length === alle.length;
+      beenden(!alles);
+      setTimeout(() => { if (t.p.isConnected) fertig(ergebnis); }, alles ? 1000 : 1800);
     }));
     function beenden(frueh) {
       if (st.vorbei) return;

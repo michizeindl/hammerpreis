@@ -24,10 +24,12 @@
   const testStat = wert('stat');
   if (testStat) {
     const [v, p, a, q] = testStat.split(',');
-    s = { verkauft: +v || 0, provision: +p || 0, besteAbw: a === '' || a == null ? null : +a, viertel: q ? { [q]: { provision: 1 } } : {} };
+    s = { durchgaenge: 1, verkauft: +v || 0, provision: +p || 0, besteAbw: a === '' || a == null ? null : +a, viertel: q ? { [q]: { provision: 1 } } : {} };
   }
-  $('#statVerkauft').textContent = B.zahl(s.verkauft);
-  $('#statProvision').textContent = B.euro(s.provision);
+  // Vor dem ersten Durchgang Strich statt „0“/„0 €“ (MZ, 27.10.2026) – wie bei Schätzung und Viertel
+  const gespielt = s.durchgaenge > 0 || s.verkauft > 0 || s.provision > 0;
+  $('#statVerkauft').textContent = gespielt ? B.zahl(s.verkauft) : '–';
+  $('#statProvision').textContent = gespielt ? B.euro(s.provision) : '–';
   $('#statSchaetzung').textContent = s.besteAbw == null ? '–' : '±' + B.prozent(s.besteAbw, 1);
   $('#statViertel').textContent = B.bestesViertel(s) || '–';
 
@@ -54,6 +56,26 @@
   zeigeWahl();
   // Spielen: Wahl ist schon gemerkt; Testhilfen der Startseite nicht ins Spiel mitnehmen
   $('#spielen').addEventListener('click', () => B.figurSetzen(figur));
+  // Gummi-Hüpfer (v10): „Spielen!“ hüpft alle 2,2s bis 14 px hoch. Ein Tipp in seiner Ruhelage (Lage ohne Animation, aus
+  // Transform-Matrix + Ursprung) zählt auch dann, wenn er gerade woanders ist und der Finger etwas darunter trifft.
+  (function () {
+    const k = $('#spielen'), html = document.documentElement;
+    const drin = (r, x, y, rand) => x >= r.left - rand && x <= r.right + rand && y >= r.top - rand && y <= r.bottom + rand;
+    const ruhelage = () => B.ruhelage(k);   // start/hn-basis.js
+    let offen = null;
+    addEventListener('pointerdown', ev => {
+      offen = null;
+      if ((ev.pointerType === 'mouse' && ev.button !== 0) || html.classList.contains('intro')) return;
+      if (ev.target.closest && ev.target.closest('button, a, input, label, [role="radio"]')) return;   // traf etwas anderes Tippbares
+      if (drin(ruhelage(), ev.clientX, ev.clientY, 0)) offen = ev.pointerId;
+    }, true);
+    addEventListener('pointerup', ev => {
+      if (offen == null || ev.pointerId !== offen) return;
+      offen = null;
+      if (drin(ruhelage(), ev.clientX, ev.clientY, 14) || drin(k.getBoundingClientRect(), ev.clientX, ev.clientY, 14)) setTimeout(() => k.click(), 0);
+    }, true);
+    addEventListener('pointercancel', () => { offen = null; }, true);
+  })();
 
   // ---------- Footer (nichts anklickbar) ----------
   const teile = [].concat(K.kontakt || [K.firma]).map(t => `<span class="teil">${esc(t)}</span>`).join(' – ');

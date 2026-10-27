@@ -44,8 +44,7 @@
         <i class="schraube" style="left:7px;bottom:7px"></i><i class="schraube" style="right:7px;bottom:7px"></i>
         <div class="rand"><div class="k">Score</div><div class="zahl" id="bestZahl">0</div><div class="v">/1.000 Punkte</div></div>
       </div>
-      <svg class="knall" id="knall" viewBox="0 0 100 100" aria-hidden="true"><path id="knallStern" d="M50 2l9 22 22-12-6 24 23 4-19 15 15 19-24-2 1 24-17-17-14 20-4-24-23 7 12-21L2 50l23-8L14 21l24 5z"/>
-        <text x="51" y="59" text-anchor="middle">DEAL?</text></svg>
+      <div class="knall" id="knall" aria-hidden="true"><svg viewBox="0 0 100 100"><path id="knallStern" d="M50 2l9 22 22-12-6 24 23 4-19 15 15 19-24-2 1 24-17-17-14 20-4-24-23 7 12-21L2 50l23-8L14 21l24 5z"/></svg><span class="wort">DEAL?</span></div>
     </div>
   </section>
   <section class="unten">
@@ -55,8 +54,8 @@
     </div>
     <a class="spielen" id="spielen" href="makler-hammerpreis/">Spielen!</a>
     <div class="bilanz" id="bilanz">
-      <div class="karte"><b id="statVerkauft">0</b><span>Objekte verkauft</span></div>
-      <div class="karte"><b id="statProvision">0 €</b><span>Provision gesamt</span></div>
+      <div class="karte"><b id="statVerkauft">–</b><span>Objekte verkauft</span></div>
+      <div class="karte"><b id="statProvision">–</b><span>Provision gesamt</span></div>
       <div class="karte"><b id="statSchaetzung">–</b><span>beste Schätzung</span></div>
       <div class="karte"><b id="statViertel">–</b><span>dein bestes Viertel</span></div>
     </div>

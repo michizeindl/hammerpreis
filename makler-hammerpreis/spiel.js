@@ -46,6 +46,14 @@
       return { ok: true, liste: Array.isArray(roh) ? roh.filter(n => n >= 1 && n <= 5) : [] };
     } catch (e) { return { ok: false, liste: [] }; }
   })();
+  // Benno stellt sich vor (MZ, v11): sein allererster Spruch auf dem Gerät ist die Vorstellung (Situation VORSTELLUNG),
+  // gemerkt in mg:hammerpreis:benno:<firma> (sobald die Blase wirklich erscheint); ohne Speicher einmal je Durchgang.
+  // Testhilfe #infos setzt auch das zurück.
+  const BENNO_KEY = 'mg:hammerpreis:benno:' + (HB.K.firma || '');
+  const benno = (() => {
+    try { if (OPT.infos) localStorage.removeItem(BENNO_KEY); return { ok: true, vorgestellt: localStorage.getItem(BENNO_KEY) === '1' }; }
+    catch (e) { return { ok: false, vorgestellt: false }; }
+  })();
 
   // ---------- Punkte ----------
   const punkte = {
@@ -91,9 +99,17 @@
   function sag(wer, situation, mimik, dauer) {
     // eigene Figur: Sprüche für beide plus die der gewählten Figur (Tessa bzw. Toni); Konkurrenz: Benno Prunk.
     // situation darf eine Liste sein (Korrekturrunde 2: z. B. ['DANEBEN', 'DANEBEN_TIEF'] = Richtung egal + zu niedrig)
+    // Gibt die Dauer der Blase in Sekunden zurück (0 = nichts gesagt).
     const S = D.sprueche;
+    const vorstellen = wer === 'konkurrenz' && !benno.vorgestellt && (S.konkurrenz.VORSTELLUNG || []).length;
+    if (vorstellen) { situation = 'VORSTELLUNG'; mimik = 'freut'; }
     const liste = [].concat(situation).reduce((l, s) => l.concat(wer === 'ich' ? (S.beide[s] || []).concat(S[HB.figur()][s] || []) : (S.konkurrenz[s] || [])), []);
-    if (liste.length) SCH.sprich(wer, zufall(liste), mimik, dauer);
+    if (!liste.length) return 0;
+    // verzögert (eine Blase zur Zeit auf schmalen Handys) nur, solange der Spieler im selben Schritt ist
+    const p0 = phase, o0 = lauf && lauf.i;
+    return SCH.sprich(wer, zufall(liste), mimik, dauer, () => phase === p0 && (!lauf || lauf.i === o0), vorstellen ? () => {
+      benno.vorgestellt = true; try { localStorage.setItem(BENNO_KEY, '1'); } catch (e) { /* privat */ }
+    } : null);
   }
 
   // ---------- Tagesauftrag: Regel-Sprache (aus texte.js schon zerlegt) ----------
@@ -292,6 +308,7 @@
   // ---------- Ablauf ----------
   function laufBeginnen() {
     lauf = neuerLauf();
+    if (!benno.ok) benno.vorgestellt = false;   // ohne Speicher: Vorstellung einmal je Durchgang
     phase = 'tagesauftrag';
     ST.leeren();
     SCH.alleVerbergen();
@@ -550,8 +567,11 @@
     const platz = () => { const k = document.querySelector('.hn-ende .hn-karte'); return k && k.getBoundingClientRect().bottom < innerHeight - 96; };
     if (!abbruch) {
       const mimik = p >= 800 ? 'freut' : p >= 550 ? 'neutral' : 'zweifelt';
-      setTimeout(() => { if (platz()) sag('ich', 'ENDE', mimik, 3); }, 900);
-      setTimeout(() => { if (platz()) sag('konkurrenz', 'ENDE', p >= 700 ? 'aergert' : 'freut', 3.2); }, 4200);
+      // Dauer nach Textlänge (+0,3s im Endbild); Benno antwortet erst, wenn die eigene Blase weg ist (MZ, v11)
+      setTimeout(() => {
+        const d = platz() ? sag('ich', 'ENDE', mimik, 0.3) : 0;
+        setTimeout(() => { if (platz()) sag('konkurrenz', 'ENDE', p >= 700 ? 'aergert' : 'freut', 0.3); }, (d ? d + 0.5 : 0.5) * 1000);
+      }, 900);
     }
   }
   // Bilanz-Zusatz: Verkäufe unter Wert und Ladenhüter getrennt nennen (MZ-Regel 27.10.2026)
@@ -643,7 +663,7 @@
   window.HN_TEST = {
     zustand() {
       const ob = lauf && lauf.aktuell;
-      return { phase, rahmen: R_.zustand, infos: infoSpeicher.ok ? infoSpeicher.liste.slice() : 'ohne Speicher', objekt: lauf ? lauf.i : 0, laeden: lauf ? lauf.laeden : 0, provision: lauf ? lauf.provision : 0,
+      return { phase, rahmen: R_.zustand, bennoVorgestellt: benno.vorgestellt, infos: infoSpeicher.ok ? infoSpeicher.liste.slice() : 'ohne Speicher', objekt: lauf ? lauf.i : 0, laeden: lauf ? lauf.laeden : 0, provision: lauf ? lauf.provision : 0,
         punkte: lauf ? lauf.ergebnisse.reduce((s, o) => s + o.punkte.schaetzung + o.punkte.besichtigung + o.punkte.kaeufer + o.punkte.bieter, 0) : 0,
         auftrag: lauf && lauf.auftrag ? lauf.auftrag.id + ' ' + lauf.auftrag.text : '', auftragStand: lauf && lauf.auftrag ? auftragText() : '',
         dauer: lauf ? (lauf.dauer || (performance.now() - lauf.start) / 1000) : 0,

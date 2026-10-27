@@ -36,10 +36,12 @@
   const kopfBalken = document.createElement('div');
   kopfBalken.className = 'intro-kopf';
   const NS = 'http://www.w3.org/2000/svg';
-  const stern = document.createElementNS(NS, 'svg');
-  stern.setAttribute('viewBox', '0 0 100 100');
-  stern.innerHTML = `<path d="${I.stern}" stroke="${T}" stroke-linejoin="round"/><text x="51" y="59" text-anchor="middle" font-family="Bangers, sans-serif" font-size="20" fill="#fff" stroke="${T}" stroke-width="1" opacity="0">DEAL?</text>`;
-  const sternPfad = stern.querySelector('path'), sternText = stern.querySelector('text');
+  // Stern als <div> mit ruhendem <svg> + HTML-Schrift (v10): bewegt wird nur das <div> – Stern und „DEAL?“ bleiben eine Einheit
+  // (am Handy blieb die <text>-Schrift im bewegten <svg> stehen). Aufbau wie der Knall-Stern der Seite (#knall, start.css).
+  const stern = document.createElement('div');
+  stern.className = 'intro-stern';
+  stern.innerHTML = `<svg viewBox="0 0 100 100"><path d="${I.stern}" stroke="${T}" stroke-linejoin="round"/></svg><span class="wort">DEAL?</span>`;
+  const sternPfad = stern.querySelector('path'), sternText = stern.querySelector('.wort');
   // Zeichen aus kunde/zeichen.svg (Fallback: „M“ der Musterfirma)
   let Z = { d: 'M0 43.6l45.9-43.6 34.4 32.7 34.5-32.7 45.9 43.6h-11v56.4h-30.6v-70.7l-38.8 36.8-38.8-36.8v70.7h-30.6v-56.4z', vb: [0, 0, 160.7, 100] };
   const zeichen = document.createElementNS(NS, 'svg');
@@ -73,7 +75,7 @@
   }
   const rechteck = el => { const r = el.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; };
   function setze(el, x, y, w, sx, sy, dreh) {   // SVG mit viewBox: Lage über transform (Ursprung oben links)
-    const vb = el.viewBox.baseVal, br = w, hh = w * vb.height / vb.width;
+    const vb = el.viewBox ? el.viewBox.baseVal : { width: 1, height: 1 }, br = w, hh = w * vb.height / vb.width;   // <div>: quadratisch
     el.style.width = br + 'px'; el.style.height = hh + 'px';
     el.style.transform = `translate(${x + br / 2}px, ${y + hh / 2}px) rotate(${dreh || 0}deg) scale(${sx || 1}, ${sy || 1}) translate(${-br / 2}px, ${-hh / 2}px)`;
   }
@@ -99,7 +101,8 @@
     setze(stern, sCx - sW / 2, sCy - sW / 2, sW, 1, 1, lerp(0, 360, pK) + (t < 0.6 ? Math.sin(t * 30) * 3 * (1 - ab(t, 0, 0.6)) : 0));
     sternPfad.setAttribute('fill', mix('#ffffff', ROT, ab(t, 1.55, 2.0)));
     sternPfad.setAttribute('stroke-width', lerp(4, 3.5, pK));
-    sternText.setAttribute('opacity', ab(t, 1.85, 2.15));
+    sternText.style.opacity = ab(t, 1.85, 2.15);
+    stern.style.setProperty('--sw', sW + 'px');   // Schriftgröße folgt der Sterngröße (start.css .intro-stern .wort)
     stern.style.opacity = t < 2.2 ? 1 : 0;
     E.knall.style.opacity = t < 2.2 ? 0 : 1;
 

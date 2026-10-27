@@ -39,10 +39,27 @@
   // nichts). „click“ zählt nur ohne Zeiger (Tastatur, el.click(): detail 0) – sonst käme beim Antippen am Handy der späte
   // „click“ des Fingers beim NÄCHSTEN Knopf an derselben Stelle an (z. B. Zuschlag → sofort „Zum Exposé“, nachgestellt
   // 27.10.2026). Doppeltes Auslösen verhindert zusätzlich eine Sperre von 400 ms.
+  // Gummi-Hüpfer (v10): rote Hauptknöpfe hüpfen alle 2,2s bis 14 px hoch. Ein Tipp in der RUHELAGE des Knopfs (wo er ohne
+  // Animation steht) zählt deshalb auch, wenn der Knopf gerade woanders ist – der Finger trifft dann z. B. die Tafel darunter.
+  // ruhelage(): Lage ohne die eigene Animation (start/hn-basis.js).
+  const ruhelage = el => HB.ruhelage(el);
+  const huepfer = new Set();
+  const drin = (r, x, y, rand) => x >= r.left - rand && x <= r.right + rand && y >= r.top - rand && y <= r.bottom + rand;
+  addEventListener('pointerdown', ev => {
+    if (!huepfer.size || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+    const z = ev.target;
+    if (z && z.closest && z.closest('button, a, input, select, textarea, label, [data-aktion], [role="button"]')) return;   // traf etwas anderes Tippbares
+    for (const b of huepfer) {
+      if (!b.isConnected) { huepfer.delete(b); continue; }
+      if (b.disabled || b.classList.contains('wartet') || b.closest('[inert]') || !b.offsetParent) continue;
+      if (drin(ruhelage(b), ev.clientX, ev.clientY, 0)) { b._hnDruck(ev); return; }
+    }
+  }, true);
+
   function tippen(el, fn) {
     let zuletzt = -1e9;
     const los = ev => { const j = performance.now(); if (j - zuletzt < 400 || el.disabled) return; zuletzt = j; fn(ev); };
-    el.addEventListener('pointerdown', ev => {
+    const druck = ev => {
       if (ev.pointerType === 'mouse' && ev.button !== 0) return;
       const id = ev.pointerId;
       const weg = () => { removeEventListener('pointerup', auf, true); removeEventListener('pointercancel', auf, true); };
@@ -50,11 +67,13 @@
         if (e.pointerId !== id) return;
         weg();
         if (e.type !== 'pointerup' || !el.isConnected) return;
-        const r = el.getBoundingClientRect(), RAND = 14;
-        if (e.clientX >= r.left - RAND && e.clientX <= r.right + RAND && e.clientY >= r.top - RAND && e.clientY <= r.bottom + RAND) los(e);
+        const RAND = 14;
+        if (drin(el.getBoundingClientRect(), e.clientX, e.clientY, RAND) || drin(ruhelage(el), e.clientX, e.clientY, RAND)) los(e);
       }
       addEventListener('pointerup', auf, true); addEventListener('pointercancel', auf, true);
-    });
+    };
+    el.addEventListener('pointerdown', druck);
+    if (el.matches('.hn-kn.haupt')) { el._hnDruck = druck; huepfer.add(el); }
     el.addEventListener('click', ev => { if (ev.detail === 0) los(ev); });
   }
 
@@ -224,17 +243,32 @@
   //  - html.seitlich (breite Bildschirme): unten links/rechts NEBEN der Tafel (genug Platz neben ihr),
   //  - Hochformat: unten links/rechts in einem freigehaltenen Streifen unter der Tafel (.hn-buehne endet darüber, CSS),
   //  - html.flach (Handy quer, kein Platz unten oder daneben): klein in der Kopfzeile der Tafel zwischen Titel und Schritten.
-  // Auf schmalen Bildschirmen spricht immer nur eine Figur (die andere Blase geht weg, sonst überlappen sie).
-  const zeiten = {};
+  // Auf schmalen Bildschirmen spricht immer nur eine Figur: steht die andere Blase noch, wartet die neue, bis sie weg ist
+  // (höchstens 5s; vorher prüft gueltig(), ob der Spieler noch im selben Schritt ist) – sonst überlappen sie.
+  // Dauer nach Textlänge (MZ, v11): 2,5s + 0,05s je Zeichen über 30, höchstens 5s (zusatz: z. B. +0,3s im Endbild).
+  const zeiten = {}, bisWeg = {};
+  const sprechDauer = text => Math.min(5, Math.max(2.5, 2.5 + 0.05 * (String(text).length - 30)));
   const html = document.documentElement;
   function kopfWeg(wer) { buehne.querySelectorAll('.hn-kopfsprecher' + (wer ? '.' + wer : '')).forEach(k => k.remove()); }
-  function sprich(wer, text, mimik, dauer) {
+  function sprich(wer, text, mimik, zusatz, gueltig, gezeigt) {   // gezeigt(): sobald die Blase wirklich steht
     const s = sprecher[wer];
-    if (!s || !text) return;
-    if (!einbl.hidden && einbl.querySelector('.hn-einbl-karte.info, .hn-einbl-karte.fehler')) return;   // Zwischenscreen/Hinweis-Screen: Figuren still
+    if (!s || !text) return 0;
+    if (!einbl.hidden && einbl.querySelector('.hn-einbl-karte.info, .hn-einbl-karte.fehler')) return 0;   // Zwischenscreen/Hinweis-Screen: Figuren still
+    const sek = sprechDauer(text) + (zusatz || 0), ms = sek * 1000;
+    const schmal = innerWidth < 700 && !html.classList.contains('seitlich');
+    if (schmal) {   // eine Blase zur Zeit: warten, bis die andere weg ist
+      const jetzt = performance.now(), frei = Math.max(0, ...Object.keys(sprecher).filter(w => w !== wer).map(w => (bisWeg[w] || 0) - jetzt));
+      if (frei > 0) {
+        if (frei > 5000) return 0;
+        setTimeout(() => { if (!gueltig || gueltig()) zeigen(); }, frei + 250);
+        return sek + (frei + 250) / 1000;
+      }
+    }
+    zeigen();
+    return sek;
+    function zeigen() {
     const fig = wer === 'ich' ? HB.figur() : 'konkurrenz';
     const inhalt = (wer === 'konkurrenz' ? `<b class="name">${esc(D.konkurrenz.name)}</b>` : '') + esc(text);
-    const ms = (dauer || 2.8) * 1000;
     if (html.classList.contains('flach') && !html.classList.contains('seitlich') && html.classList.contains('hn-imspiel')) {
       // Kopfzeile der aktuellen Tafel; ohne Tafel (Einblendung, Endbild) bleibt die Figur still
       const kopf = buehne.querySelector('.hn-panel:not(.weg) .hn-pkopf');
@@ -245,6 +279,7 @@
       k.setAttribute('aria-live', 'polite');
       const tag = kopf.querySelector('.hn-tag');
       if (tag && tag.nextSibling) kopf.insertBefore(k, tag.nextSibling); else kopf.append(k);
+      bisWeg[wer] = performance.now() + ms; if (gezeigt) gezeigt();
       clearTimeout(zeiten[wer]);
       zeiten[wer] = setTimeout(() => { k.classList.add('weg'); setTimeout(() => k.remove(), 300); }, ms);
       return;
@@ -253,10 +288,12 @@
     s.querySelector('.fig').innerHTML = F.svg(fig, mimik || 'neutral');
     s.querySelector('.blase').innerHTML = inhalt;
     s.classList.remove('an'); void s.offsetWidth; s.classList.add('an');
+    bisWeg[wer] = performance.now() + ms; if (gezeigt) gezeigt();
     clearTimeout(zeiten[wer]);
     zeiten[wer] = setTimeout(() => s.classList.remove('an'), ms);
+    }
   }
-  function stumm() { Object.keys(sprecher).forEach(w => { clearTimeout(zeiten[w]); sprecher[w].classList.remove('an'); }); kopfWeg(); }
+  function stumm() { Object.keys(sprecher).forEach(w => { clearTimeout(zeiten[w]); bisWeg[w] = 0; sprecher[w].classList.remove('an'); }); kopfWeg(); }
 
   // ---------- Einblendung (Tagesauftrag, Markt-Ereignis, Mappe) ----------
   let einblWeiter = null, einblTipp = null;

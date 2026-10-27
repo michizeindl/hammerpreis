@@ -10,7 +10,11 @@ button { font: inherit; }
 #anzeige { justify-content: flex-end; z-index: 45; padding-right: max(10px, env(safe-area-inset-right)); top: env(safe-area-inset-top); height: 54px; }
 #anzeige .links, #anzeige .rechts { display: none; }
 #anzeige button, #anzeige a { background: #fff; color: var(--tinte); border: 2.5px solid var(--tinte); box-shadow: 2px 2px 0 var(--tinte); width: 38px; height: 38px; }
-#anzeige button:hover, #anzeige a:hover { background: var(--gelb); }
+/* Hover-Effekte nur mit Maus (v11, MZ-Fund: am Handy bleibt :hover an der letzten Tippstelle hängen – dort lag danach eine
+   Käuferkarte und war gelb, ohne gewählt zu sein). Der Rahmen (rahmen.css) vergrößert die Kopf-Knöpfe beim Darüberfahren – am
+   Touch-Gerät hier zurückgenommen. */
+@media (hover: hover) and (pointer: fine) { #anzeige button:hover, #anzeige a:hover { background: var(--gelb); } }
+@media not all and (hover: hover) and (pointer: fine) { #anzeige button:hover, #anzeige a:hover { transform: none; background: #fff; } }
 #anzeige #heimKnopf { order: -1; }
 
 /* ---------- Logo-Schild oben links (immer allein, weißer Grund) ---------- */
@@ -90,8 +94,10 @@ html.breit .hn-buehne { top: calc(60px + env(safe-area-inset-top)); }
 .hn-kn.kunde { background: var(--haupt); color: var(--haupt-text, #fff); font: 800 15px/1.2 'Figtree', sans-serif; letter-spacing: .2px; text-transform: none; padding: 11px 0; box-shadow: 4px 4px 0 var(--tinte); cursor: default; }
 a.hn-kn.kunde { cursor: pointer; }
 /* Darüberfahren ohne Verschieben (Korrekturrunde 2): ein wandernder Knopf ließ Klicks am Rand ins Leere gehen */
-.hn-kn:not([disabled]):not(.kunde):hover { filter: brightness(1.06); box-shadow: 6px 6px 0 var(--tinte); }
-.hn-kn.neben:not([disabled]):hover { background: var(--gelb-hell); box-shadow: none; }
+@media (hover: hover) and (pointer: fine) { 
+  .hn-kn:not([disabled]):not(.kunde):hover { filter: brightness(1.06); box-shadow: 6px 6px 0 var(--tinte); }
+  .hn-kn.neben:not([disabled]):hover { background: var(--gelb-hell); box-shadow: none; }
+}
 .hn-kn.haupt:not([disabled]):active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--tinte); }
 .hn-kn[disabled] { opacity: .65; }
 .hn-kn:focus-visible, .hn-kk:focus-visible, .hn-hw:focus-visible, .hn-zuschlag:focus-visible { outline: 3px solid var(--haupt); outline-offset: 2px; }
@@ -172,7 +178,7 @@ a.hn-kn.kunde { cursor: pointer; }
 }
 .hn-hw svg { width: 20px; height: 20px; fill: none; stroke: var(--haupt); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .hn-hw em { position: absolute; top: -8px; right: -6px; font-style: normal; font-size: 10.5px; font-weight: 900; background: var(--rot); color: #fff; border: 2px solid var(--tinte); border-radius: 9px; padding: 0 5px; }
-.hn-hw:not([disabled]):hover { background: var(--gelb-hell); box-shadow: 3px 3px 0 var(--tinte); }
+@media (hover: hover) and (pointer: fine) { .hn-hw:not([disabled]):hover { background: var(--gelb-hell); box-shadow: 3px 3px 0 var(--tinte); } }
 .hn-hw.offen { background: var(--gelb); box-shadow: none; transform: translate(2px, 2px); opacity: 1; }
 .hn-hw.offen em { background: var(--tinte); }
 .hn-hw[disabled]:not(.offen) { opacity: .5; }
@@ -223,7 +229,7 @@ a.hn-kn.kunde { cursor: pointer; }
   display: flex; align-items: center; gap: 10px; text-align: left; padding: 7px 10px; border: 3px solid var(--tinte); border-radius: 14px; background: #fff;
   box-shadow: 3px 3px 0 var(--tinte); cursor: pointer; color: var(--tinte); transition: transform .15s, background-color .2s; animation: hnHuepf .4s ease calc(var(--i) * .08s) both;
 }
-.hn-kk:not([disabled]):hover { background: var(--gelb-hell); box-shadow: 5px 5px 0 var(--tinte); }
+@media (hover: hover) and (pointer: fine) { .hn-kk:not([disabled]):hover { background: var(--gelb-hell); box-shadow: 5px 5px 0 var(--tinte); } }   /* nur mit Maus (v11) */
 .hn-kk .fig { width: 54px; height: 54px; flex: none; }
 .hn-kk .txt { display: flex; flex-direction: column; gap: 1px; font-size: 12.5px; line-height: 1.3; }
 .hn-kk .txt b { font-size: 14px; }
@@ -414,7 +420,7 @@ a.hn-kn.kunde { cursor: pointer; }
 .hn-auftragzeile { font: 700 12px 'Figtree', sans-serif; margin: 4px 0 0; color: #777; }
 .hn-auftragzeile.ja { color: #2f8a44; }
 .hn-mappe-reihe { display: flex; gap: 4px; width: 100%; justify-content: center; margin: 10px auto 0; padding: 4px; border: 0; background: none; cursor: pointer; border-radius: 8px; }
-.hn-mappe-reihe:hover { background: var(--gelb-hell); }
+@media (hover: hover) and (pointer: fine) { .hn-mappe-reihe:hover { background: var(--gelb-hell); } }
 .hn-mini { position: relative; width: 26px; height: 26px; flex: 0 1 26px; min-width: 0; aspect-ratio: 1; height: auto; border: 2.5px solid var(--tinte); border-radius: 5px; background: #fff; overflow: hidden; animation: hnHuepf .3s ease calc(.6s + var(--i) * .06s) both; }
 .hn-mini.v::after { content: ""; position: absolute; inset: 7px -4px; background: var(--rot); transform: rotate(-24deg); border-top: 1.5px solid var(--tinte); border-bottom: 1.5px solid var(--tinte); }
 .hn-mini.l { opacity: .75; filter: grayscale(1); }
@@ -998,24 +1004,58 @@ html.kompakt .hn-s-expose .hn-bk-vgl b { font-size: 13.5px; }
 html.kompakt .hn-s-expose .hn-bk-vgl { gap: 5px; }
 html.flach .hn-s-expose .hn-bk { grid-column: 1; }
 
-/* Rote Knöpfe comicartig (MZ, 27.10.2026): Plopp mit Federn beim Erscheinen, danach alle paar Sekunden ein Glanz über den Knopf.
-   Der Glanz ist ein Pseudo-Element – Hover/Drücken verschieben die Trefferfläche nicht (Regel aus Korrekturrunde 2).
-   Ab dem Tagesauftrag warten die Knöpfe 1,6s (.wartet: unsichtbar, nicht tippbar; schirme.js knopfWarten), dann der Plopp.
-   Ausnahme: Zuschlag kommt sofort (Timing der Bieterrunde). */
-.hn-kn.haupt, .hn-zuschlag { position: relative; overflow: hidden; }
-.hn-kn.haupt { animation: hnKnopfPlopp .55s cubic-bezier(.3,1.7,.5,1) backwards; }
-.hn-zuschlag { animation: hnKnopfPlopp .5s cubic-bezier(.3,1.7,.5,1) backwards; }
-@keyframes hnKnopfPlopp { 0% { opacity: 0; transform: scale(.55); } 55% { opacity: 1; transform: scale(1.08); } 78% { transform: scale(.97); } 100% { transform: scale(1); } }
-.hn-kn.haupt::after, .hn-zuschlag::after { content: ""; position: absolute; top: -10%; bottom: -10%; left: -60%; width: 36%; pointer-events: none;
-  background: linear-gradient(105deg, rgba(255,255,255,0), rgba(255,255,255,.5) 50%, rgba(255,255,255,0)); transform: skewX(-12deg);
-  animation: hnKnopfGlanz 4.6s ease-in-out 1.4s infinite; }
-@keyframes hnKnopfGlanz { 0%, 78% { left: -60%; } 100% { left: 130%; } }
+/* Rote Knöpfe: Variante B „Gummi-Hüpfer“ (MZ, 27.10.2026, v10; Vorlage Material/Vorschau/knopf-animation/vorschlaege.html, .b).
+   Erscheinen: fällt von oben herein und federt wie Gummi (hnKnopfRein = bRein, 0,9s). Danach alle 2,2s ein Hüpfer (hnKnopfHuepf
+   = bHuepf: stauchen, hoch, federnd landen; Ursprung unten) und ein Ring pulsiert nach außen (::after, hnKnopfRing = bRing).
+   Nur der Knopf als Ganzes bewegt sich, die Schrift darin nicht eigens.
+   Drücken (:active) und Maus darüber (:hover, nur mit Maus) halten den Hüpfer an (das Erscheinen nicht – sonst bliebe ein Knopf, der unter der ruhenden Maus
+   erscheint, unsichtbar stehen). Tipps in der Ruhelage zählen auch mitten im Hüpfer (schirme.js tippen(), „Ruhelage“).
+   Ab dem Tagesauftrag warten die Knöpfe 1,6s (.wartet: unsichtbar, nicht tippbar; schirme.js knopfWarten), dann Erscheinen + Hüpfer.
+   Zuschlag: nur Erscheinen + Ring, kein Hüpfer (Timing der Bieterrunde); im Fenster leuchtet er (hnPuls).
+   v11: Hüpfhöhe, Breitziehen und Ring je Seite nur so groß, wie um den Knopf Platz ist (start/hn-basis.js knopfPlatz setzt
+   --kh/--ky/--kx/--rt/--rr/--rb/--rl; ohne Messung volle Werte der Vorlage) – nichts wird überdeckt, nichts ragt über den Kartenrand. */
+.hn-kn.haupt, .hn-zuschlag { position: relative; overflow: visible; transform-origin: 50% 100%; }
+.hn-kn.haupt { animation: hnKnopfRein .9s cubic-bezier(.25,1.9,.45,1) both, hnKnopfHuepf 2.2s ease-in-out 1s infinite; }
+.hn-kn.haupt:active { animation-play-state: running, paused; }
+@media (hover: hover) and (pointer: fine) { .hn-kn.haupt:hover { animation-play-state: running, paused; } }   /* Touch: :hover bliebe hängen und hielte den Hüpfer an */
+.hn-kn.haupt[disabled] { animation-name: hnKnopfRein, none; }
+.hn-zuschlag { animation: hnKnopfRein .9s cubic-bezier(.25,1.9,.45,1) both; }
+@keyframes hnKnopfRein { 0% { transform: translateY(-60px) scaleY(1.3) scaleX(.8); opacity: 0; }
+  45% { transform: translateY(0) scaleY(.7) scaleX(calc(1 + .25 * var(--kxe, 1))); opacity: 1; }
+  65% { transform: translateY(calc(-10px * var(--ky, 1))) scaleY(calc(1 + .1 * var(--ky, 1))) scaleX(.94); }
+  82% { transform: translateY(0) scaleY(.92) scaleX(calc(1 + .06 * var(--kx, 1))); } 100% { transform: none; } }
+@keyframes hnKnopfHuepf { 0%, 55%, 100% { transform: none; } 62% { transform: scaleY(.82) scaleX(calc(1 + .14 * var(--kx, 1))); }
+  70% { transform: translateY(calc(-1 * var(--kh, 14px))) scaleY(calc(1 + .12 * var(--ky, 1))) scaleX(.92); }
+  78% { transform: translateY(0) scaleY(.88) scaleX(calc(1 + .1 * var(--kx, 1))); }
+  86% { transform: scaleY(calc(1 + .04 * var(--ky, 1))) scaleX(.97); } 92% { transform: none; } }
+/* Ring als wachsendes Band (statt box-shadow), damit er je Seite nur so weit wächst, wie Platz ist (--rt/--rr/--rb/--rl) */
+@keyframes hnKnopfRing {
+  0%, 60% { top: -4px; right: -4px; bottom: -4px; left: -4px; border-width: 0; border-color: rgba(255,216,74,.9); border-radius: 16px; }
+  90%, 100% { top: calc(-4px - var(--rt, 18px)); right: calc(-4px - var(--rr, 18px)); bottom: calc(-4px - var(--rb, 18px)); left: calc(-4px - var(--rl, 18px));
+    border-width: var(--rt, 18px) var(--rr, 18px) var(--rb, 18px) var(--rl, 18px); border-color: rgba(255,216,74,0);
+    border-radius: calc(16px + var(--rl, 18px)) calc(16px + var(--rr, 18px)) calc(16px + var(--rr, 18px)) calc(16px + var(--rl, 18px)) /
+      calc(16px + var(--rt, 18px)) calc(16px + var(--rt, 18px)) calc(16px + var(--rb, 18px)) calc(16px + var(--rb, 18px)); } }
+.hn-kn.haupt::after, .hn-zuschlag::after { content: ""; position: absolute; inset: -4px; box-sizing: border-box; border: 0 solid rgba(255,216,74,.9); border-radius: 16px; pointer-events: none;
+  animation: hnKnopfRing 2.2s ease-out 1s infinite; }
+@media (hover: hover) and (pointer: fine) { .hn-kn.haupt:hover::after, .hn-zuschlag:hover::after { animation-play-state: paused; } }
 .hn-kn.haupt[disabled]::after, .hn-zuschlag[disabled]::after, .hn-kn.haupt.wartet::after { animation: none; display: none; }
 .hn-kn.haupt.wartet { opacity: 0 !important; pointer-events: none; animation: none; }
 .hn-panel.zoegern .hn-zuschlag { animation: hnPuls .4s ease-in-out infinite; }
 .hn-ib-bieter .hn-zuschlag::after, .hn-zuschlag-muster::after { display: none; }
+/* v11: mehr Luft über roten Knöpfen, wo Platz ist (Hüpfer 14px + Strecken + Ring); wo nicht, wird der Hüpfer kleiner (knopfPlatz) */
+.hn-start .hn-best + .hn-kn.haupt { margin-top: 34px; }
+.hn-einbl-karte > .hn-kn.haupt { margin-top: 20px; }
+.hn-schirm .hn-reihe2:has(> .hn-kn.haupt) { margin-top: 24px; gap: 14px; }
+html.kompakt .hn-start .hn-best + .hn-kn.haupt { margin-top: 28px; }
+html.flach .hn-start .hn-best + .hn-kn.haupt { margin-top: 18px; }
+html.kompakt .hn-einbl-karte > .hn-kn.haupt, html.flach .hn-einbl-karte > .hn-kn.haupt { margin-top: 12px; }
+html.kompakt .hn-schirm .hn-reihe2:has(> .hn-kn.haupt), html.flach .hn-schirm .hn-reihe2:has(> .hn-kn.haupt) { margin-top: 12px; }
+.hn-pfuss > .hn-kn.haupt { margin-top: 10px; }   /* Tafel-Fuß: etwas Luft; der Rest regelt knopfPlatz */
+html.kompakt .hn-pfuss > .hn-kn.haupt { margin-top: 4px; }
+html.flach .hn-pfuss > .hn-kn.haupt { margin-top: 0; }
 
 /* ---------- Bewegung reduzieren ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .hn-kn.haupt, .hn-kn.haupt::after, .hn-zuschlag::after { animation: none !important; }   /* Gummi-Hüpfer + Ring aus (Zuschlag-Leuchten wie bisher) */
 }

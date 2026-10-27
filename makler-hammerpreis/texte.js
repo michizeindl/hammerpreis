@@ -4943,13 +4943,18 @@ window.HN_TEXTE = {
     "So günstig? Dann kaufe ich es am Ende noch selbst.",
     "Zu tief gestapelt. Dein Eigentümer ruft gleich bei mir an.",
     "Schnäppchenpreis – für wen arbeitest du eigentlich?"
+   ],
+   "VORSTELLUNG": [
+    "Benno Prunk, Prunk & Partner. Die guten Häuser verkaufe normalerweise ich.",
+    "Prunk mein Name, Benno Prunk. Merk ihn dir – du wirst ihn heute öfter hören.",
+    "Benno Prunk von Prunk & Partner. Keine Sorge, ein paar Häuser lasse ich dir übrig."
    ]
   }
  },
  "rahmen": {
   "START_ANLEITUNG": "Zehn Objekte insgesamt. Wechselnde Tagesaufträge. Eigentümer anhören, besichtigen, Preis schätzen. Den optimalen Käufer wählen, zum besten Preis verkaufen. Bei drei Ladenhütern fällt der Hammer.",
   "START_FRAGE": [
-   "Bei welchem Preis fällt hier der Hammer?",
+   "Wann gibt es den Zuschlag?",
    "Wie gut kennst du den Preis eines Hauses?",
    "Triffst du den Hammerpreis – oder liegst du weit daneben?"
   ],
