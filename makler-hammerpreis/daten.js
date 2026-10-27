@@ -25,6 +25,12 @@
     fundGewicht: { klein: 1, mittel: 2, 'groß': 3 },   // Besichtigung: Gewicht je Merkmal nach Wirkung (Text Writer)
     kaeuferPunkte: { passt: 15, budget: 5, wunsch: 3 },   // passt / Budget zu klein / Wünsche passen nicht
     bieterSpaet: 4,               // zu lange gewartet: Bestbieter steigt aus, Verkauf an den Zweiten
+    // Bieterrunde in beide Richtungen (Idee MZ, Balancing-Runde 1, 27.10.2026): Start = Schätzung des Spielers, jeder Bieter
+    // hat ein verdecktes Limit (Anteil des Marktwerts). Dein Käufer nach Rolle: passt ≈ 105 %, Budget zu klein = sein Budget
+    // (höchstens 97 %), passt nicht ≈ 93 %; Mitbieter zufällig zwischen mitVon und mitBis.
+    bieterLimit: { passt: 1.05, wunsch: 0.93, budgetMax: 0.97, mitVon: 0.88, mitBis: 1.12 },
+    bieterExakt: 0.015,           // Start näher als 1,5 % des Marktwerts am höchsten Limit = „fast exakt“: kurzes Hin und Her, dann das Fenster
+    bieterSperre: 0.8,            // sinkende Gebote: Zuschlag, bevor jemand zugreift = Knopf 0,8s gesperrt („Noch greift keiner zu“)
     ladenhueterAb: 35,            // Schätzung mehr als 35 % ZU HOCH → nicht verkauft („Ladenhüter“)
     // Schätzung mehr als 35 % ZU NIEDRIG → „Verkauf unter Wert“ (MZ, 27.10.2026): verkauft zum geschätzten Preis, 0 Schätzpunkte,
     // Käufer und Bieterrunde entfallen (bei dem Preis greift der erste Interessent zu; 0 Käufer- und 0 Bieterpunkte),
@@ -182,9 +188,13 @@
     einladung: variante('EINLADUNG', ''),
     kundenknopf: (r('KUNDENKNOPF', {}).knopf) || 'Was ist *dein* Haus wert?',
     schaetzung: r('SCHAETZUNG', []),
-    schrittTitel: [0, 1, 2, 3, 4].map(i => (schritte[i] && schritte[i].titel) || ['Anruf', 'Besichtigung', 'Schätzen', 'Käufer', 'Bieterrunde'][i]),
+    // Schritt-Titel ohne Artikel (MZ, 27.10.2026, Platz): Anruf – Besichtigung – Preis – Käufer – Bieterrunde
+    schrittTitel: [0, 1, 2, 3, 4].map(i => (schritte[i] && schritte[i].titel) || ['Anruf', 'Besichtigung', 'Preis', 'Käufer', 'Bieterrunde'][i]),
     schrittText: [0, 1, 2, 3, 4].map(i => (schritte[i] && schritte[i].text) || ''),
-    schrittKurz: ['Anruf', 'Besichtigung', 'Schätzen', 'Käufer', 'Bieterrunde'],
+    schrittKurz: [0, 1, 2, 3, 4].map(i => (schritte[i] && schritte[i].titel) || ['Anruf', 'Besichtigung', 'Preis', 'Käufer', 'Bieterrunde'][i]),
+    // Balancing-Runde 1 (27.10.2026): Zwischenscreens vor jedem Schritt (nur beim ersten Objekt), Texte von MZ
+    info: [0, 1, 2, 3, 4].map(i => (r('INFO_SCHRITT', [])[i]) || ''),
+    infoKnopf: r('INFO_KNOPF', 'Verstanden'),
     hinweise: {
       grundriss: hinweisText('HINWEIS_GRUNDRISS'), energie: hinweisText('HINWEIS_ENERGIEAUSWEIS'),
       stadtplan: hinweisText('HINWEIS_LAGE'), baujahr: hinweisText('HINWEIS_BAUJAHR'),
@@ -205,7 +215,21 @@
     unterWertKurz: 'Unter Wert',
     unterWertTexte: variante('UNTERWERT_TEXT', 'Viel zu günstig angesetzt.'),
     bieterErklaerung: Object.assign({ titel: 'So gewinnst du die Bieterrunde', text: '', tipp: '', knopf: 'Verstanden' }, r('BIETER_ERKLAERUNG', {})),
-    bieterSatz: { fenster: r('BIETER_TREFFER', ''), frueh: r('BIETER_FRUEH', ''), spaet: r('BIETER_SPAET', '') },
+    bieterSatz: { fenster: r('BIETER_TREFFER', ''), frueh: r('BIETER_FRUEH', ''), spaet: r('BIETER_SPAET', ''),
+      fensterSinkend: r('BIETER_TREFFER_SINKEND', r('BIETER_TREFFER', '')), spaetSinkend: r('BIETER_SPAET_SINKEND', r('BIETER_SPAET', '')),
+      nochKeiner: r('BIETER_NOCH_KEINER', 'Noch greift keiner zu.') },
+    bieterStatus: Object.assign({ steigen: 'Die Gebote steigen.', sinken: 'Der Preis sinkt.', zoegern: 'Alle zögern – jetzt zuschlagen.', zugriff: 'Einer greift zu – jetzt zuschlagen.' }, r('BIETER_STATUS', {})),
+    // Hinweis-Screens bei „Unter Wert“ und „Ladenhüter“ (MZ: Variante b) und Exposé-Kopf bei normalem Verkauf (MZ: Variante a)
+    skala: Object.assign({ links: 'viel zu günstig', mitte: 'passt', rechts: 'viel zu teuer' }, r('SKALA', {})),
+    fehler: {
+      unterwert: { band: r('UNTERWERT_STUFE', 'Unter Wert verkauft'), blasen: variante('UNTERWERT_EIGENTUEMER', 'Für {preis}? Viel zu billig.'),
+        text: r('UNTERWERT_HINWEIS', ''), verlust: r('UNTERWERT_VERLUST', 'Verschenkt: {betrag}') },
+      laden: { band: 'Ladenhüter', blasen: variante('LADENHUETER_EIGENTUEMER', 'Für {preis} will es keiner.'),
+        text: r('LADENHUETER_HINWEIS', ''), verlust: r('LADENHUETER_VERLUST', 'Kein Verkauf – keine Provision') },
+      tipp: r('FEHLER_TIPP', ''),
+    },
+    verkauftBlasen: { sehrgut: variante('VERKAUFT_EIGENTUEMER_SEHRGUT', 'Sehr gut verkauft.'), gut: variante('VERKAUFT_EIGENTUEMER_GUT', 'Gut verkauft.'),
+      knapp: variante('VERKAUFT_EIGENTUEMER_KNAPP', 'Verkauft ist verkauft.') },
     // Korrekturrunde 2 (27.10.2026): Warnung nach dem vorletzten Ladenhüter, halbe Provision unter Wert, Rückfrage beim Haus-Knopf
     ladenWarnung: Object.assign({ titel: 'Achtung', text: 'Noch ein Ladenhüter und der Tag ist vorbei.', knopf: 'Weiter' }, r('LADENHUETER_WARNUNG', {})),
     unterWertProvision: r('UNTERWERT_PROVISION', 'Halbe Provision – Rabatt-Ärger mit dem Eigentümer'),

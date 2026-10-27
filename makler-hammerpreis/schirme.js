@@ -219,6 +219,7 @@
   function sprich(wer, text, mimik, dauer) {
     const s = sprecher[wer];
     if (!s || !text) return;
+    if (!einbl.hidden && einbl.querySelector('.hn-einbl-karte.info, .hn-einbl-karte.fehler')) return;   // Zwischenscreen/Hinweis-Screen: Figuren still
     const fig = wer === 'ich' ? HB.figur() : 'konkurrenz';
     const inhalt = (wer === 'konkurrenz' ? `<b class="name">${esc(D.konkurrenz.name)}</b>` : '') + esc(text);
     const ms = (dauer || 2.8) * 1000;
@@ -309,7 +310,7 @@
 
   window.HN_SCHIRME = {
     buehne, hud: hudApi, start: startZeigen, ende: endeZeigen, sprich, stumm, einblendung, mappe: mappeZeigen, alleVerbergen,
-    rueckfrage, tippen, get rueckfrageOffen() { return !frage.hidden; },
+    rueckfrage, tippen, get rueckfrageOffen() { return !frage.hidden; }, get einblendungOffen() { return !einbl.hidden; },
     knoepfe(k) { knoepfe = k; },
     SCHEIN, esc, el,
   };

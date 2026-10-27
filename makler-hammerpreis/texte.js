@@ -4947,7 +4947,7 @@ window.HN_TEXTE = {
   }
  },
  "rahmen": {
-  "START_ANLEITUNG": "Zehn Objekte: Eigentümer anhören, besichtigen, Preis schätzen, Käufer wählen, Bieterrunde gewinnen. Je genauer du schätzt, desto mehr Punkte – die Provision hängt vom Verkaufspreis ab. Drei Ladenhüter – dann ist Feierabend.",
+  "START_ANLEITUNG": "Zehn Objekte insgesamt. Wechselnde Tagesaufträge. Eigentümer anhören, besichtigen, Preis schätzen. Den optimalen Käufer wählen, zum besten Preis verkaufen. Bei drei Ladenhütern fällt der Hammer.",
   "START_FRAGE": [
    "Bei welchem Preis fällt hier der Hammer?",
    "Wie gut kennst du den Preis eines Hauses?",
@@ -4955,24 +4955,24 @@ window.HN_TEXTE = {
   ],
   "SCHRITT": [
    {
-    "titel": "Der Anruf",
+    "titel": "Anruf",
     "text": "Der Eigentümer nennt seinen Wunschpreis. Hör gut zu – er muss nicht stimmen."
    },
    {
-    "titel": "Die Besichtigung",
+    "titel": "Besichtigung",
     "text": "Tippe im Raum auf Mängel und Pluspunkte. Die Zeit läuft, also such gezielt."
    },
    {
-    "titel": "Der Preis",
+    "titel": "Preis",
     "text": "Stelle den Preis mit dem Regler ein. Hinweise helfen, kosten aber Punkte."
    },
    {
-    "titel": "Der Käufer",
+    "titel": "Käufer",
     "text": "Wähle den Käufer, dessen Budget und Wünsche zum Haus passen."
    },
    {
-    "titel": "Die Bieterrunde",
-    "text": "Die Gebote steigen. Schlage im richtigen Moment zu, nicht zu früh und nicht zu spät."
+    "titel": "Bieterrunde",
+    "text": "Die Gebote starten bei deiner Schätzung. Schlag zu, wenn alle zögern oder einer zugreift."
    }
   ],
   "ABBRUCH_BAND": "Zu viele Ladenhüter",
@@ -5076,13 +5076,22 @@ window.HN_TEXTE = {
   ],
   "BIETER_ERKLAERUNG": {
    "titel": "So gewinnst du die Bieterrunde",
-   "text": "Die Gebote steigen. Sobald alle Bieter zögern („Hm…“), zittern und der Knopf pulsiert, steht das Höchstgebot.",
-   "tipp": "Genau dann auf „Zuschlag“ tippen. Zu früh bringt weniger, zu spät verkauft an den Zweiten.",
+   "text": "Steigen die Gebote, schlag zu, sobald alle zögern („Hm…“). Sinken sie, sobald einer „Ich nehme es!“ ruft.",
+   "tipp": "Zu früh bringt weniger, zu spät geht das Objekt an den Nächsten.",
    "knopf": "Verstanden"
   },
   "BIETER_TREFFER": "Genau beim Zögern zugeschlagen – mehr war nicht drin.",
   "BIETER_FRUEH": "Die Bieter hätten noch erhöht. Warte, bis alle zögern.",
   "BIETER_SPAET": "Beim Zögern nicht zugeschlagen – der Höchstbietende ist ausgestiegen.",
+  "BIETER_TREFFER_SINKEND": "Zugeschlagen, als der Erste zugriff – mehr war nicht drin.",
+  "BIETER_SPAET_SINKEND": "Beim Zugreifen gezögert – der Bieter sprang ab, und der Preis fiel weiter.",
+  "BIETER_STATUS": {
+   "steigen": "Die Gebote steigen.",
+   "sinken": "Zu teuer für alle – der Preis sinkt.",
+   "zoegern": "Alle zögern – jetzt zuschlagen.",
+   "zugriff": "Einer greift zu – jetzt zuschlagen."
+  },
+  "BIETER_NOCH_KEINER": "Noch greift keiner zu. Warte auf „Ich nehme es!“.",
   "LADENHUETER_WARNUNG": {
    "titel": "Achtung",
    "text": "Noch ein Ladenhüter und der Tag ist vorbei.",
@@ -5095,6 +5104,49 @@ window.HN_TEXTE = {
    "weiter": "Weiterspielen",
    "beenden": "Beenden"
   },
+  "INFO_SCHRITT": [
+   "Ein Eigentümer will verkaufen und nennt seinen Wunschpreis. Hör genau hin: Manche übertreiben, manche verschweigen etwas.",
+   "Schau dich in jedem Bereich genau um und erkenne Mängel und Pluspunkte. Was du findest, hilft dir bei der Preisgestaltung. Die Zeit läuft. Tippe dann auf „Zur Schätzung“.",
+   "Stell deine Preisvorstellung mit dem Regler ein. An der Vorgabe kannst du dich orientieren. Hinweise wie z. B. die Lage helfen, kosten aber Punkte. Je genauer dein Preis passt, desto besser.",
+   "Mehrere Interessenten, aber nur einer passt wirklich. Vergleiche Wünsche, No-Gos und Budget mit deiner Immobilie.",
+   "Einen möglichen Käufer hast du ausgewählt. Nun kommen weitere Interessenten hinzu. Den Startpreis hast du festgelegt. Verkaufe jetzt zum besten Preis!"
+  ],
+  "INFO_KNOPF": "Verstanden",
+  "SKALA": {
+   "links": "viel zu günstig",
+   "mitte": "passt",
+   "rechts": "viel zu teuer"
+  },
+  "UNTERWERT_EIGENTUEMER": [
+   "Was? Für {preis}? Der Käufer hat ja nicht mal verhandelt.",
+   "{preis}? Das Haus war mein ganzes Erspartes. Haben Sie sich verrechnet?",
+   "Der Käufer hat sofort unterschrieben. Kein Wunder bei dem Preis."
+  ],
+  "LADENHUETER_EIGENTUEMER": [
+   "Seit Wochen kein einziger Interessent. So wird das nichts.",
+   "Das Schild hängt und hängt. Für {preis} will es einfach keiner.",
+   "Ich hatte auf einen Verkauf gehofft, nicht auf ein Dauerschild im Vorgarten."
+  ],
+  "UNTERWERT_HINWEIS": "Über 35 % zu günstig angesetzt. Der erste Interessent unterschrieb sofort – eine Bieterrunde gab es nicht.",
+  "LADENHUETER_HINWEIS": "Über 35 % zu teuer angesetzt. Zu diesem Preis wollte niemand kaufen – das Objekt bleibt liegen.",
+  "UNTERWERT_VERLUST": "Verschenkt: {betrag} – nur halbe Provision",
+  "LADENHUETER_VERLUST": "Kein Verkauf – keine Provision",
+  "FEHLER_TIPP": "Tipp: Wirf einen Blick in den Preisspiegel und decke Hinweise auf, bevor du den Preis festlegst.",
+  "VERKAUFT_EIGENTUEMER_SEHRGUT": [
+   "Genau mein Preis, und so schnell. Sie verstehen Ihr Handwerk.",
+   "Das ging ja wie geschmiert. Ich empfehle Sie weiter.",
+   "Besser hätte es nicht laufen können. Darauf stoße ich heute an."
+  ],
+  "VERKAUFT_EIGENTUEMER_GUT": [
+   "Ein guter Verkauf. Damit kann ich gut leben.",
+   "Passt. Der neue Besitzer wird sich hier wohlfühlen.",
+   "Ordentlich verkauft. Ich bin zufrieden."
+  ],
+  "VERKAUFT_EIGENTUEMER_KNAPP": [
+   "Verkauft ist verkauft. Beim Preis hätte ich mehr Sicherheit erwartet.",
+   "Hauptsache, es ist weg. Ganz rund lief es aber nicht.",
+   "Na gut, unterschrieben ist unterschrieben. Der Preis war ein Wackelkandidat."
+  ],
   "SCHAETZUNG": [
    {
     "stufe": "Volltreffer",

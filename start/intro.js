@@ -179,7 +179,7 @@
     if (fertig) return;
     if (t0 == null) t0 = jetzt;
     const t = STAND != null ? STAND : (jetzt - t0) / 1000;
-    bild(t);
+    try { bild(t); } catch (e) { ende(false); return; }   // ein Fehler im Ablauf darf die Startseite nie leer lassen
     if (STAND == null && t >= (RUHIG ? 1.55 : DAUER)) { ende(false); return; }
     requestAnimationFrame(schleife);
   }
@@ -235,5 +235,14 @@
     los();
   });
   setTimeout(los, 600);
-  bild(0);   // erstes Bild sofort (Icon steht, bevor das Logo da ist)
+  try { bild(0); } catch (e) { ende(false); }   // erstes Bild sofort (Icon steht, bevor das Logo da ist)
+  // Absicherung (Balancing-Runde 1, Fund beim ersten Laden nach dem Publish: Startseite blieb leer, nur Strahlen + „DEAL?“):
+  // requestAnimationFrame steht still, solange die Seite verdeckt ist (Hintergrund-Tab, App-Wechsel, verdeckte Vorschau).
+  // Dann lief das Intro nie zu Ende. Jetzt: wird die Seite während des Intros verdeckt, endet es sofort; spätestens nach
+  // 4,5s endet es per Uhr (unabhängig von requestAnimationFrame) und zeigt die fertige Startseite.
+  if (STAND == null) {
+    setTimeout(() => ende(false), (DAUER + 1.45) * 1000);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) ende(false); });
+    if (document.hidden) ende(false);   // im Hintergrund geöffnet: gleich die fertige Startseite
+  }
 })();

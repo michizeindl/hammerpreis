@@ -4,7 +4,10 @@
 // Beim ersten Besuch wird das Gerüst (Startseite + Spiel) vorab abgelegt, damit das Spiel auch offline startet.
 // Bei Änderungen an dieser Datei VERSION erhöhen – alte Zwischenspeicher dieser Sammlung (Präfix „hammerpreis-“) werden gelöscht.
 const PREFIX = 'hammerpreis-';
-const VERSION = PREFIX + 'v5';   // v5: Korrekturrunde 2 (27.10.2026) – Preis/Regler im Fuß, Sprüche nach Richtung, Antippen am Knopfrand, Rückfrage
+const VERSION = PREFIX + 'v6';   // v6: Balancing-Runde 1 (27.10.2026) – Bieterrunde in beide Richtungen ab der Schätzung (verdeckte Limits,
+                                 //     Gebotskurve), Zwischenscreens vor jedem Schritt, Hinweis-Screens unter Wert/Ladenhüter, Exposé-Kopf,
+                                 //     Titel ohne Artikel, „Zur Schätzung“ immer, Anruf gefüllt, Startanleitung neu, Intro abgesichert.
+                                 // v5: Korrekturrunde 2 (27.10.2026) – Preis/Regler im Fuß, Sprüche nach Richtung, Antippen am Knopfrand, Rückfrage
                                  //     beim Haus-Knopf, Bieter-Fenster 1,6 → 1,0s, halbe Provision unter Wert, Ladenhüter-Warnung, Knopf an fester Stelle.
                                  // v4: Nachbesserung (27.10.2026) – große Zahlen (Endbild-Punkte, Gebot, Baujahr, Statistik der Startseite) in Figtree Black, Text BIETER_ERKLAERUNG.
                                  // v3: Korrekturrunde 1 (27.10.2026) – Verkauf unter Wert, Erklärung Bieterrunde, Sprechblasen, Käufer,

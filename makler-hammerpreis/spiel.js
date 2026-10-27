@@ -10,7 +10,8 @@
 //   #schritt=besichtigung|schaetzen|kaeufer|bieter  (mit #objekt bzw. #los: direkt in diesen Schritt)
 //   #tempo=0.5  Uhren langsamer   #ende=854  Beispiel-Endbild (nichts gespeichert)   #abbruch  Beispiel-Abbruch
 //   #figur=makler|maklerin   #auftrag=N (Tagesauftrag TAG-N)   #ereignis=N (erstes Ereignis EVT-N)   #obj=12 (OBJ-012 als Objekt 1)
-//   #bieter=2  Schalter bieterrundeJedes zum Ausprobieren
+//   #bieter=2  Schalter bieterrundeJedes zum Ausprobieren   #ohneinfo  ohne Zwischenscreens
+//   #schaetzung=0.9  mit #schritt=bieter: Startpreis = 90 % des Marktwerts (sonst 100 %; Auktion steigend/sinkend ausprobieren)
 //   window.HN_TEST: zustand(), schritt() (Trefferflächen, Räume, Regler, Käufer, Gebote), setzen(wert) (Regler)
 (function () {
   'use strict';
@@ -20,7 +21,8 @@
   const wert = (name, art) => { const m = new RegExp('[#&]' + name + '(?:=([^&]*))?(?:&|$)').exec(hash); return m ? (art === 'zahl' ? (m[1] != null ? +m[1] : null) : (m[1] != null ? decodeURIComponent(m[1]) : true)) : undefined; };
   const OPT = { los: !!wert('los'), objekt: wert('objekt', 'zahl'), schritt: wert('schritt'), tempo: wert('tempo', 'zahl'),
     ende: wert('ende', 'zahl'), abbruch: wert('abbruch') !== undefined, auftrag: wert('auftrag', 'zahl'), ereignis: wert('ereignis', 'zahl'),
-    figur: wert('figur'), obj: wert('obj', 'zahl'), bieter: wert('bieter', 'zahl') };
+    figur: wert('figur'), obj: wert('obj', 'zahl'), bieter: wert('bieter', 'zahl'), ohneinfo: wert('ohneinfo') !== undefined,
+    schaetzung: wert('schaetzung', 'zahl') };
   if (OPT.figur === 'makler' || OPT.figur === 'maklerin') HB.figurSetzen(OPT.figur);
   if (OPT.bieter > 0) R.bieterrundeJedes = OPT.bieter;
   const testlauf = OPT.objekt != null || !!OPT.schritt || OPT.tempo != null || OPT.obj != null;
@@ -210,7 +212,7 @@
       benutzt.push(e);
       return e;
     });
-    return { objekte, eigentuemer, ereignisse: ereignisseWaehlen(objekte), markt: [], auftrag, i: 0, laeden: 0, provision: 0, ergebnisse: [], start: performance.now() };
+    return { objekte, eigentuemer, ereignisse: ereignisseWaehlen(objekte), markt: [], auftrag, i: 0, laeden: 0, provision: 0, ergebnisse: [], info: {}, start: performance.now() };
   }
   function objektVorbereiten(nr) {
     const o = lauf.objekte[nr - 1], d = (nr - 1) / Math.max(1, R.objekte - 1);
@@ -320,7 +322,7 @@
     const ziel = OPT.schritt && nr === (OPT.objekt || 1) ? OPT.schritt : null;
     if (ziel) {   // Testhilfe: Vorstufen sinnvoll füllen
       if (['schaetzen', 'kaeufer', 'bieter'].includes(ziel)) ob.gefunden = ob.daten.merkmale.slice(0, 2);
-      if (['kaeufer', 'bieter'].includes(ziel)) { ob.schaetzung = ob.wert; ob.abw = 0; }
+      if (['kaeufer', 'bieter'].includes(ziel)) { ob.schaetzung = D.rund(ob.wert * (OPT.schaetzung > 0 ? OPT.schaetzung : 1), 1000); ob.abw = Math.abs(ob.schaetzung - ob.wert) / ob.wert * 100; }
       if (ziel === 'kaeufer' || ziel === 'bieter') kaeuferWaehlen(ob);
       if (ziel === 'bieter') { ob.wahl = ob.kaeufer.findIndex(k => k.art === 'passt'); ob.kaeuferArt = 'passt'; bieterVorbereiten(ob); }
       ({ besichtigung: schrittBesichtigung, schaetzen: schrittSchaetzen, kaeufer: schrittKaeufer, bieter: schrittBieter }[ziel] || schrittAnruf)(ob);
@@ -328,11 +330,26 @@
     }
     schrittAnruf(ob);
   }
+  // Zwischenscreens (Balancing-Runde 1): vor jedem der fünf Schritte einmal je Durchgang – normal beim ersten Objekt; Käufer und
+  // Bieterrunde beim ersten Objekt, in dem sie vorkommen (z. B. wenn Objekt 1 unter Wert verkauft wurde). Die Tafel des
+  // Schritts steht schon dahinter; Uhr und Bieterrunde laufen erst nach „Verstanden“ (def.schritt hält an, solange eine
+  // Einblendung offen ist). Testhilfe #ohneinfo schaltet sie ab.
+  function mitInfo(nr, ob, danach) {
+    if (!lauf || OPT.ohneinfo || lauf.info[nr]) { if (danach) danach(); return false; }
+    lauf.info[nr] = true;
+    SCH.stumm();
+    ST.info(nr, ob, () => { if (danach) danach(); });
+    return true;
+  }
   function schrittAnruf(ob) {
     phase = 'anruf';
-    ST.anruf(ob, () => schrittBesichtigung(ob));
-    if (ob.nr === 1) spaeter(1400, () => sag('konkurrenz', 'START', 'freut'));
-    else if (Math.random() < 0.25) spaeter(700, () => sag('ich', 'START', 'neutral'));
+    const zeigen = !OPT.ohneinfo && lauf && !lauf.info[1];
+    const klingeln = ST.anruf(ob, () => schrittBesichtigung(ob), { leise: zeigen });
+    mitInfo(1, ob, () => {
+      if (zeigen) klingeln();
+      if (ob.nr === 1) spaeter(1400, () => sag('konkurrenz', 'START', 'freut'));
+      else if (Math.random() < 0.25) spaeter(700, () => sag('ich', 'START', 'neutral'));
+    });
   }
   function schrittBesichtigung(ob) {
     phase = 'besichtigung';
@@ -341,9 +358,11 @@
       ob.punkte.besichtigung = punkte.besichtigung(e);
       schrittSchaetzen(ob);
     });
+    mitInfo(2, ob);
   }
   function schrittSchaetzen(ob) {
     phase = 'schaetzen';
+    mitInfo(3, ob);
     ST.schaetzen(ob, (e, aufloesen) => {
       ob.schaetzung = e.schaetzung; ob.hinweise = e.hinweise;
       ob.abw = Math.abs(e.schaetzung - ob.wert) / ob.wert * 100;
@@ -396,29 +415,32 @@
   function schrittKaeufer(ob) {
     phase = 'kaeufer';
     if (!ob.kaeufer) kaeuferWaehlen(ob);
+    mitInfo(4, ob);
     ST.kaeufer(ob, e => {
       ob.wahl = e.wahl;
       ob.kaeuferArt = ob.kaeufer[e.wahl].art;
       ob.punkte.kaeufer = punkte.kaeufer(ob.kaeuferArt);
       bieterVorbereiten(ob);
       if (ob.mitBieter) schrittBieter(ob);
-      else verkaufen(ob, { preis: ob.bieter.spitze, art: 'direkt', q: 1, kaeuferPunkte: ob.punkte.kaeufer });
+      else verkaufen(ob, { preis: ob.bieter.spitze, art: 'direkt', q: 1, kaeuferPunkte: ob.punkte.kaeufer, an: ob.kaeufer[e.wahl].name });
     });
   }
+  // Bieterrunde in beide Richtungen (Balancing-Runde 1): Startpreis = Schätzung, verdeckte Limits je Bieter (daten.js
+  // regeln.bieterLimit). limits[0] = dein Käufer, dann die Mitbieter. spitze = Limit deines Käufers (Verkauf ohne Bieterrunde).
   function bieterVorbereiten(ob) {
-    const k = ob.kaeufer[ob.wahl], w = ob.wert;
-    const spitze = D.rund(k.art === 'passt' ? w * 1.05 : k.art === 'budget' ? Math.min(k.budget, w * 0.97) : w * 0.93, 1000);
-    ob.bieter = { start: D.rund(spitze * 0.86, 1000), spitze, zweiter: D.rund(spitze * 0.94, 1000), takt: ob.schwer.bieterTakt, fenster: ob.schwer.bieterFenster };
+    const k = ob.kaeufer[ob.wahl], w = ob.wert, L = R.bieterLimit;
+    const eigen = D.rund(k.art === 'passt' ? w * L.passt : k.art === 'budget' ? Math.min(k.budget, w * L.budgetMax) : w * L.wunsch, 1000);
+    const limits = [eigen].concat((ob.mitbieter || []).map(() => D.rund(w * (L.mitVon + Math.random() * (L.mitBis - L.mitVon)), 1000)));
+    // keine zwei gleichen Limits (sonst wäre „der Zweite“ gleich teuer)
+    for (let i = 1; i < limits.length; i++) while (limits.slice(0, i).includes(limits[i])) limits[i] -= 1000;
+    const start = ob.schaetzung != null ? ob.schaetzung : D.rund(eigen * 0.86, 1000);
+    ob.bieter = { start, limits, spitze: eigen, takt: ob.schwer.bieterTakt, fenster: ob.schwer.bieterFenster };
   }
   function schrittBieter(ob) {
     phase = 'bieter';
-    const los = () => {
-      if (Math.random() < 0.35) spaeter(500, () => sag('konkurrenz', 'BIETEN', 'neutral'));
-      ST.bieter(ob, e => verkaufen(ob, e));
-    };
-    // vor der ersten Bieterrunde eines Durchgangs einmal erklären, woran man den richtigen Moment erkennt (Korrekturrunde 1)
-    if (lauf && !lauf.bieterErklaert) { lauf.bieterErklaert = true; SCH.stumm(); ST.bieterErklaerung(ob, los); }
-    else los();
+    // Zwischenscreen 5 (enthält die frühere Bieter-Erklärung): vor der ersten Bieterrunde des Durchgangs
+    ST.bieter(ob, e => verkaufen(ob, e));
+    mitInfo(5, ob, () => { if (Math.random() < 0.35) spaeter(500, () => sag('konkurrenz', 'BIETEN', 'neutral')); });
   }
   function ladenWarnung(weiter) {
     const W = T.ladenWarnung;
@@ -553,7 +575,8 @@
     texte: { titel: T.titel, untertitel: T.fragen[0], anleitung: T.anleitung },
     neu() { if (R_.zustand === 'spiel') laufBeginnen(); },
     // während der Rückfrage „Spiel wirklich beenden?“ steht alles still (Uhr der Besichtigung, Bieterrunde)
-    schritt(dt) { zeit += dt; if (!SCH.rueckfrageOffen) ST.schritt(dt); },
+    // ebenso, solange eine Einblendung offen ist (Zwischenscreen vor der Besichtigung bzw. Bieterrunde: Uhr startet erst danach)
+    schritt(dt) { zeit += dt; if (!SCH.rueckfrageOffen && !SCH.einblendungOffen) ST.schritt(dt); },
     zeichne(g, b, h, zustand, dt) {
       if (zustand !== 'spiel') zeit += dt || 0;
       const tz = lauf ? Math.min(1, ((lauf.i || 1) - 1 + (phase === 'ende' ? 1 : 0.5)) / R.objekte) : 0.05;
@@ -606,7 +629,7 @@
         objektDaten: ob ? { id: ob.daten.id, titel: ob.daten.titel, art: ob.art.name, viertel: ob.viertel.name, wert: ob.wert, wunsch: ob.wunsch,
           eigentuemer: ob.eigentuemer.id, verschwiegen: ob.verschwiegen, raeume: ob.raeume.map(r => r.id), mitBieter: ob.mitBieter,
           punkte: ob.punkte, abw: ob.abw, kaeufer: ob.kaeufer ? ob.kaeufer.map(k => k.art) : null } : null,
-        ergebnisse: lauf ? lauf.ergebnisse.map(o => ({ nr: o.nr, id: o.daten.id, abw: o.abw && +o.abw.toFixed(2), laden: o.ladenhueter, unterWert: !!o.unterWert, preis: o.verkauf ? o.verkauf.preis : 0, provision: o.provision || 0, punkte: o.punkte, verkauf: o.verkauf && o.verkauf.art })) : [] };
+        ergebnisse: lauf ? lauf.ergebnisse.map(o => ({ nr: o.nr, id: o.daten.id, wert: o.wert, schaetzung: o.schaetzung, abw: o.abw && +o.abw.toFixed(2), laden: o.ladenhueter, unterWert: !!o.unterWert, preis: o.verkauf ? o.verkauf.preis : 0, provision: o.provision || 0, punkte: o.punkte, verkauf: o.verkauf && o.verkauf.art })) : [] };
     },
     schritt: () => ST.test(),
     setzen: v => ST.setzen(v),
