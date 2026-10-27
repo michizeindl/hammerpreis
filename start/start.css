@@ -75,7 +75,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   overflow: visible; transform-origin: 50% 50%;
 }
 .knall path { fill: var(--rot); stroke: var(--tinte); stroke-width: 3.5; stroke-linejoin: round; }
-.knall text { font: 26px 'Bangers', sans-serif; fill: #fff; stroke: var(--tinte); stroke-width: 1; letter-spacing: .5px; }
+/* „DEAL?“ (MZ, 27.10.2026): kleiner und mittig im Innenfeld des Sterns (Mitte der Innenecken ≈ 51/52), berührt keine Zacken */
+.knall text { font: 20px 'Bangers', sans-serif; fill: #fff; stroke: var(--tinte); stroke-width: .9; letter-spacing: .4px; }
 
 /* Figurenwahl */
 .wahl { display: flex; gap: calc(12px * var(--s)); justify-content: center; margin-top: 0; }
@@ -110,6 +111,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   box-shadow: 5px 5px 0 var(--tinte); transition: transform .15s, box-shadow .15s;
 }
 .spielen:hover { filter: brightness(1.06); box-shadow: 7px 7px 0 var(--tinte); }
+/* Rote Knöpfe comicartig (MZ, 27.10.2026): Plopp mit Federn beim Erscheinen, danach alle paar Sekunden ein Glanz über den Knopf
+   (Pseudo-Element – die Trefferfläche bewegt sich nie) */
+.spielen { position: relative; overflow: hidden; }
+.spielen::after { content: ""; position: absolute; top: -10%; bottom: -10%; left: -60%; width: 38%; pointer-events: none;
+  background: linear-gradient(105deg, rgba(255,255,255,0), rgba(255,255,255,.5) 50%, rgba(255,255,255,0)); transform: skewX(-12deg);
+  animation: knopfGlanz 4.6s ease-in-out 1.6s infinite; }
+@keyframes knopfGlanz { 0%, 78% { left: -60%; } 100% { left: 130%; } }
 .spielen:active { filter: brightness(.94); box-shadow: 2px 2px 0 var(--tinte); }
 .spielen:focus-visible, .fig:focus-visible, .ton:focus-visible { outline: 3px solid var(--haupt); outline-offset: 3px; }
 
@@ -150,7 +158,8 @@ html:not(.intro) .schild { animation: schildRein .6s cubic-bezier(.3,1.4,.5,1) .
 html:not(.intro) .knall { animation: knallRein .5s cubic-bezier(.3,1.6,.5,1) .3s both, knallPuls 2.4s ease-in-out 1s infinite; }
 html:not(.intro) .wahl, html:not(.intro) .spielen, html:not(.intro) .karte { animation: gleiten .5s ease both; }
 html:not(.intro) .wahl { animation-delay: .2s; }
-html:not(.intro) .spielen { animation-delay: .3s; }
+html:not(.intro) .spielen { animation: knopfPlopp .6s cubic-bezier(.3,1.7,.5,1) .3s both; }
+@keyframes knopfPlopp { 0% { opacity: 0; transform: scale(.55); } 55% { opacity: 1; transform: scale(1.08); } 78% { transform: scale(.97); } 100% { transform: scale(1); } }
 html:not(.intro) .karte:nth-child(1) { animation-delay: .38s; } html:not(.intro) .karte:nth-child(2) { animation-delay: .44s; }
 html:not(.intro) .karte:nth-child(3) { animation-delay: .5s; } html:not(.intro) .karte:nth-child(4) { animation-delay: .56s; }
 html.fertig .knall { animation: knallPuls 2.4s ease-in-out .4s infinite; }

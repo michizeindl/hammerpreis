@@ -58,6 +58,18 @@
     el.addEventListener('click', ev => { if (ev.detail === 0) los(ev); });
   }
 
+  // Rote Hauptknöpfe ab dem Tagesauftrag erst nach 1,6s (MZ, 27.10.2026: man liest zuerst) – solange unsichtbar und nicht
+  // tippbar (disabled + .wartet), dann Plopp (CSS). Testhilfe #tempo=2 halbiert die Wartezeit. Zuschlag wartet nie.
+  const tempoM = /[#&]tempo=([\d.]+)/.exec(location.hash);
+  const WARTEN = 1.6 / (tempoM && +tempoM[1] > 0 ? +tempoM[1] : 1);
+  function knopfWarten(b, sek) {
+    const s = sek == null ? WARTEN : sek;
+    if (!(s > 0)) return 0;
+    b.disabled = true; b.classList.add('wartet');
+    setTimeout(() => { if (!b.isConnected) return; b.classList.remove('wartet'); b.disabled = false; }, s * 1000);
+    return s;
+  }
+
   let knoepfe = {};
   function knopfBinden(wurzel) {
     wurzel.querySelectorAll('[data-aktion]').forEach(b => tippen(b, () => {
@@ -262,9 +274,11 @@
     const zu = () => { if (einbl.hidden) return; einbl.hidden = true; einbl.innerHTML = ''; sperren(false); const w = einblWeiter; einblWeiter = null; if (w) w(); };
     const k = einbl.querySelector('.hn-kn');
     if (k) tippen(k, zu);
+    const gewartet = k && !o.sofort ? knopfWarten(k) : 0;   // Preisspiegel/Mappe (sofort): ohne Wartezeit
     if (o.tippZu) {
-      // erst nach der Knall-Animation (0,35s) zu schließen, damit ein Doppeltipp die Einblendung nicht sofort wieder schließt
-      const ab = performance.now() + 350;
+      // erst nach der Knall-Animation (0,35s) zu schließen, damit ein Doppeltipp die Einblendung nicht sofort wieder schließt;
+      // mit wartendem Knopf auch nicht vorher (Tippen daneben soll die Wartezeit nicht umgehen)
+      const ab = performance.now() + Math.max(350, gewartet * 1000);
       einblTipp = ev => { if (ev.target.closest('.hn-kn') || performance.now() < ab) return; einbl.removeEventListener('pointerdown', einblTipp); einblTipp = null; zu(); };
       einbl.addEventListener('pointerdown', einblTipp);
     }
@@ -276,7 +290,7 @@
       <div class="hn-expo${m.verkauft ? (m.unterWert ? ' unterwert' : '') : ' laden'}"><div class="bild">${SZ.hausSvg(m.art)}${m.unterWert ? `<span class="hn-stempel unterwert">${esc(T.unterWertKurz)}</span>` : m.verkauft ? '<span class="hn-stempel">Verkauft</span>' : `<span class="hn-stempel grau">${esc(T.ladenhueter)}</span>`}</div>
         <b>${esc(m.name)}</b><span>${esc(m.viertel)}</span><span>${m.verkauft ? HB.euro(m.preis) + (m.unterWert ? ' – unter Wert' : '') : 'nicht verkauft'}</span>
         <span class="abw">${m.abw != null ? HB.prozent(m.abw, 1) + ' daneben' : ''}</span></div>`).join('') + `</div></div>`;
-    einblendung(html, { knopf: 'Schließen', klasse: 'breit' });
+    einblendung(html, { knopf: 'Schließen', klasse: 'breit', sofort: true });
   }
 
   function alleVerbergen() { start.hidden = true; ende.hidden = true; }
@@ -310,7 +324,7 @@
 
   window.HN_SCHIRME = {
     buehne, hud: hudApi, start: startZeigen, ende: endeZeigen, sprich, stumm, einblendung, mappe: mappeZeigen, alleVerbergen,
-    rueckfrage, tippen, get rueckfrageOffen() { return !frage.hidden; }, get einblendungOffen() { return !einbl.hidden; },
+    rueckfrage, tippen, knopfWarten, get rueckfrageOffen() { return !frage.hidden; }, get einblendungOffen() { return !einbl.hidden; },
     knoepfe(k) { knoepfe = k; },
     SCHEIN, esc, el,
   };

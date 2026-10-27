@@ -856,7 +856,14 @@ html.flach .hn-s-anruf .hn-anleitung { grid-column: 1 / -1; grid-row: 4; margin-
 .hn-kurve .lab.markt.drunter { transform: translateY(5px); }
 .hn-kurve.aufgedeckt line.markt, .hn-kurve.aufgedeckt .lab.markt { opacity: 1; }
 .hn-kurve .punkt { position: absolute; width: 15px; height: 15px; border-radius: 50%; background: var(--gelb); border: 2.5px solid var(--tinte); transform: translate(-50%, -50%); }
-.hn-kurve .hn-stempel.verkauft { left: 50%; top: 50%; margin: -22px 0 0 -66px; font-size: 30px; z-index: 1; }
+/* kleine Handys nach dem Zuschlag: Kurve höher (Ergebniszeile im Fuß kostet Platz) – Gebot kleiner ohne Überschrift
+   (der Preis steht auch in der Ergebniszeile), damit Stempel und Schilder nebeneinander passen (v9: Bieter wieder normal groß,
+   seit der Erklärsatz entfällt) */
+html.kompakt .hn-s-bieter[class*="zuschlag-"] .hn-gebot .k { display: none; }
+html.kompakt .hn-s-bieter[class*="zuschlag-"] .hn-betrag { font-size: 28px; }
+html.kompakt .hn-s-bieter[class*="zuschlag-"] .hn-kurve { min-height: 96px; }
+html.kompakt .hn-kurve .lab { font-size: 9.5px; }
+.hn-kurve .hn-stempel.verkauft { margin: 0; font-size: 30px; z-index: 1; white-space: nowrap; }   /* Lage und Größe: schritte.js stempelPlatz */
 .hn-kurve .lab, .hn-kurve .punkt { z-index: 2; }   /* Beschriftungen bleiben über dem Stempel lesbar */
 .hn-s-bieter .hn-bieterreihe { margin-top: 26px; gap: 6px; }
 .hn-s-bieter .hn-bp { max-width: 108px; transition: opacity .3s, filter .3s; }
@@ -990,6 +997,23 @@ html.flach .hn-bk-eig .fig { width: 52px; height: 52px; }
 html.kompakt .hn-s-expose .hn-bk-vgl b { font-size: 13.5px; }
 html.kompakt .hn-s-expose .hn-bk-vgl { gap: 5px; }
 html.flach .hn-s-expose .hn-bk { grid-column: 1; }
+
+/* Rote Knöpfe comicartig (MZ, 27.10.2026): Plopp mit Federn beim Erscheinen, danach alle paar Sekunden ein Glanz über den Knopf.
+   Der Glanz ist ein Pseudo-Element – Hover/Drücken verschieben die Trefferfläche nicht (Regel aus Korrekturrunde 2).
+   Ab dem Tagesauftrag warten die Knöpfe 1,6s (.wartet: unsichtbar, nicht tippbar; schirme.js knopfWarten), dann der Plopp.
+   Ausnahme: Zuschlag kommt sofort (Timing der Bieterrunde). */
+.hn-kn.haupt, .hn-zuschlag { position: relative; overflow: hidden; }
+.hn-kn.haupt { animation: hnKnopfPlopp .55s cubic-bezier(.3,1.7,.5,1) backwards; }
+.hn-zuschlag { animation: hnKnopfPlopp .5s cubic-bezier(.3,1.7,.5,1) backwards; }
+@keyframes hnKnopfPlopp { 0% { opacity: 0; transform: scale(.55); } 55% { opacity: 1; transform: scale(1.08); } 78% { transform: scale(.97); } 100% { transform: scale(1); } }
+.hn-kn.haupt::after, .hn-zuschlag::after { content: ""; position: absolute; top: -10%; bottom: -10%; left: -60%; width: 36%; pointer-events: none;
+  background: linear-gradient(105deg, rgba(255,255,255,0), rgba(255,255,255,.5) 50%, rgba(255,255,255,0)); transform: skewX(-12deg);
+  animation: hnKnopfGlanz 4.6s ease-in-out 1.4s infinite; }
+@keyframes hnKnopfGlanz { 0%, 78% { left: -60%; } 100% { left: 130%; } }
+.hn-kn.haupt[disabled]::after, .hn-zuschlag[disabled]::after, .hn-kn.haupt.wartet::after { animation: none; display: none; }
+.hn-kn.haupt.wartet { opacity: 0 !important; pointer-events: none; animation: none; }
+.hn-panel.zoegern .hn-zuschlag { animation: hnPuls .4s ease-in-out infinite; }
+.hn-ib-bieter .hn-zuschlag::after, .hn-zuschlag-muster::after { display: none; }
 
 /* ---------- Bewegung reduzieren ---------- */
 @media (prefers-reduced-motion: reduce) {

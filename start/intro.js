@@ -38,7 +38,7 @@
   const NS = 'http://www.w3.org/2000/svg';
   const stern = document.createElementNS(NS, 'svg');
   stern.setAttribute('viewBox', '0 0 100 100');
-  stern.innerHTML = `<path d="${I.stern}" stroke="${T}" stroke-linejoin="round"/><text x="50" y="58" text-anchor="middle" font-family="Bangers, sans-serif" font-size="26" fill="#fff" stroke="${T}" stroke-width="1" opacity="0">DEAL?</text>`;
+  stern.innerHTML = `<path d="${I.stern}" stroke="${T}" stroke-linejoin="round"/><text x="51" y="59" text-anchor="middle" font-family="Bangers, sans-serif" font-size="20" fill="#fff" stroke="${T}" stroke-width="1" opacity="0">DEAL?</text>`;
   const sternPfad = stern.querySelector('path'), sternText = stern.querySelector('text');
   // Zeichen aus kunde/zeichen.svg (Fallback: „M“ der Musterfirma)
   let Z = { d: 'M0 43.6l45.9-43.6 34.4 32.7 34.5-32.7 45.9 43.6h-11v56.4h-30.6v-70.7l-38.8 36.8-38.8-36.8v70.7h-30.6v-56.4z', vb: [0, 0, 160.7, 100] };

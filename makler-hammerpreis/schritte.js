@@ -63,6 +63,7 @@
       b.disabled = true; KL.ton(klang || 'klick');
       try { klick(); } catch (err) { b.disabled = false; console.error(err); }   // eslint-disable-line no-console
     });
+    if ((klasse || 'haupt') === 'haupt') SCH.knopfWarten(b);   // rote Knöpfe erst nach 1,6s (MZ, 27.10.2026)
     return b;
   }
   const flaecheText = (ob, genau) => {
@@ -407,7 +408,7 @@
       <table class="hn-tabelle">${zeilen}</table>
       ${ob.viertel.text ? `<p class="hn-klein"><b>${esc(ob.viertel.name)}:</b> ${esc(ob.viertel.text)}</p>` : ''}
       <p class="hn-klein">Baujahr, Zustand, Energie, Mängel, Pluspunkte und der Markt verschieben den Preis – das lernst du mit jedem Objekt.<br>${esc(T.hinweisSpielLang || T.hinweisSpiel)}</p>`,
-      { knopf: 'Schließen', tippZu: true });
+      { knopf: 'Schließen', tippZu: true, sofort: true });
   }
 
   // ---------- (4) Käufer ----------
@@ -589,14 +590,41 @@
       betrag.textContent = HB.euro(preis);
       if (st.verlauf[st.verlauf.length - 1] !== preis) st.verlauf.push(preis);
       st.markt = true; kurve.classList.add('aufgedeckt'); kurveZeichnen();   // jetzt erst die Marktwert-Linie
-      const satz = art === 'fenster' ? (richtung === 'sinken' ? T.bieterSatz.fensterSinkend : T.bieterSatz.fenster)
-        : art === 'spaet' ? (richtung === 'sinken' ? T.bieterSatz.spaetSinkend : T.bieterSatz.spaet) : T.bieterSatz.frueh;
+      // nur noch die Ergebniszeile (MZ, 27.10.2026: Erklärsatz BIETER_TREFFER/FRUEH/SPAET/_SINKEND entfällt – mehr Platz für Kurve
+      // und Bieter; die Texte bleiben ungenutzt im Entwurf)
       status('');
-      t.fuss.innerHTML = `<p class="hn-erg">${art === 'fenster' ? 'Bester Moment' : art === 'spaet' ? 'Zu lange gewartet' : 'Etwas zu früh'} – verkauft für ${HB.euro(preis)} <b>+${pk}</b></p>` +
-        (satz ? `<p class="hn-erg-satz ${art}">${esc(satz)}</p>` : '');
+      t.fuss.innerHTML = `<p class="hn-erg">${art === 'fenster' ? 'Bester Moment' : art === 'spaet' ? 'Zu lange gewartet' : 'Etwas zu früh'} – verkauft für ${HB.euro(preis)} <b>+${pk}</b></p>`;
       t.fuss.append(knopf('Zum Exposé', 'haupt', () => fertig(erg)));
       // Stempel mit seinem Klang (nach dem zweiten Hammerschlag) – in der Gebotskurve, verdeckt weder Namen noch Hinweistext
-      setTimeout(() => { if (t.p.isConnected) kurve.insertAdjacentHTML('beforeend', '<div class="hn-stempel verkauft">Verkauft</div>'); }, stempelNach * 1000);
+      setTimeout(() => {
+        if (!t.p.isConnected) return;
+        const s = el('div', 'hn-stempel verkauft', 'Verkauft');
+        kurve.append(s);
+        stempelPlatz(s);
+        addEventListener('resize', () => { if (s.isConnected) stempelPlatz(s); });
+      }, stempelNach * 1000);
+    }
+    // Verkauft-Stempel an eine freie Stelle der Kurve (Abnahme v7: bei 320×640 lag er über den Schildern): Kandidaten von der
+    // Mitte nach außen, Schrift von 30 px abwärts; gewählt wird die erste Lage ohne Überschneidung mit den Schildern „Deine
+    // Schätzung“/„Marktwert“ und dem Punkt (gedrehter Umriss ±12° grob als größeres Rechteck gerechnet).
+    function stempelPlatz(s) {
+      const K = kurve.getBoundingClientRect();
+      const hinder = [...kurve.querySelectorAll('.lab, .punkt')].map(e => { const r = e.getBoundingClientRect(); return { l: r.left - K.left - 3, t: r.top - K.top - 3, r: r.right - K.left + 3, b: r.bottom - K.top + 3 }; });
+      const sin = Math.sin(12 * Math.PI / 180), cos = Math.cos(12 * Math.PI / 180);
+      let best = null;
+      for (const gr of [30, 25, 21, 17, 14, 12]) {
+        s.style.fontSize = gr + 'px';
+        const w = s.offsetWidth, h = s.offsetHeight, bw = w * cos + h * sin, bh = w * sin + h * cos;
+        for (const [fx, fy] of [[0.5, 0.5], [0.62, 0.5], [0.38, 0.5], [0.5, 0.3], [0.5, 0.7], [0.72, 0.3], [0.72, 0.7], [0.28, 0.3], [0.28, 0.7], [0.82, 0.5], [0.18, 0.5]]) {
+          const cx = Math.max(bw / 2 + 2, Math.min(K.width - bw / 2 - 2, K.width * fx)), cy = Math.max(bh / 2 + 2, Math.min(K.height - bh / 2 - 2, K.height * fy));
+          const r = { l: cx - bw / 2, t: cy - bh / 2, r: cx + bw / 2, b: cy + bh / 2 };
+          const ueber = hinder.reduce((sum, o) => sum + Math.max(0, Math.min(r.r, o.r) - Math.max(r.l, o.l)) * Math.max(0, Math.min(r.b, o.b) - Math.max(r.t, o.t)), 0);
+          if (!best || ueber < best.ueber - 0.5) best = { ueber, gr, x: cx - w / 2, y: cy - h / 2 };
+          if (ueber === 0) break;
+        }
+        if (best.ueber === 0) break;
+      }
+      s.style.fontSize = best.gr + 'px'; s.style.left = best.x + 'px'; s.style.top = best.y + 'px';
     }
     // Zuschlag zählt schon beim Aufsetzen des Fingers (Reaktionsknopf) und ist von Anfang an aktiv (Korrekturrunde 2).
     const hauen = () => {

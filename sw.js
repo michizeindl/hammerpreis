@@ -4,7 +4,10 @@
 // Beim ersten Besuch wird das Gerüst (Startseite + Spiel) vorab abgelegt, damit das Spiel auch offline startet.
 // Bei Änderungen an dieser Datei VERSION erhöhen – alte Zwischenspeicher dieser Sammlung (Präfix „hammerpreis-“) werden gelöscht.
 const PREFIX = 'hammerpreis-';
-const VERSION = PREFIX + 'v6';   // v6: Balancing-Runde 1 (27.10.2026) – Bieterrunde in beide Richtungen ab der Schätzung (verdeckte Limits,
+const VERSION = PREFIX + 'v9';   // v9: Bieterrunde ohne Erklärsatz nach dem Zuschlag (nur Ergebniszeile), mehr Platz für Kurve und Bieter.
+                                 // v8: Verkauft-Stempel in der Gebotskurve an freier Stelle (nie über den Schildern).
+                                 // v7: Zwischenscreens nur beim allerersten Spiel auf dem Gerät (mg:hammerpreis:infos:<firma>, MZ 27.10.2026).
+                                 // v6: Balancing-Runde 1 (27.10.2026) – Bieterrunde in beide Richtungen ab der Schätzung (verdeckte Limits,
                                  //     Gebotskurve), Zwischenscreens vor jedem Schritt, Hinweis-Screens unter Wert/Ladenhüter, Exposé-Kopf,
                                  //     Titel ohne Artikel, „Zur Schätzung“ immer, Anruf gefüllt, Startanleitung neu, Intro abgesichert.
                                  // v5: Korrekturrunde 2 (27.10.2026) – Preis/Regler im Fuß, Sprüche nach Richtung, Antippen am Knopfrand, Rückfrage
