@@ -4,7 +4,8 @@
 // Beim ersten Besuch wird das Gerüst (Startseite + Spiel) vorab abgelegt, damit das Spiel auch offline startet.
 // Bei Änderungen an dieser Datei VERSION erhöhen – alte Zwischenspeicher dieser Sammlung (Präfix „hammerpreis-“) werden gelöscht.
 const PREFIX = 'hammerpreis-';
-const VERSION = PREFIX + 'v13';  // v13: Zwischenscreens bei jedem neuen Start von der Startseite/Neuladen, nicht nach „Nochmal“ (statt je Gerät).
+const VERSION = PREFIX + 'v14';  // v14: rote Knöpfe hinter Einblendungen unsichtbar, Wartezeit ab dem Schließen (MZ, 28.10.2026).
+                                 // v13: Zwischenscreens bei jedem neuen Start von der Startseite/Neuladen, nicht nach „Nochmal“ (statt je Gerät).
                                  // v12: Startbild nur noch eine Frage auf allen Geräten („Bekommst du den Zuschlag?“).
                                  // v11: Hüpfer/Ring nur so groß, wie um den Knopf Platz ist (knopfPlatz), mehr Luft über roten Knöpfen,
                                  //      Hover nur mit Maus, Sprechblasen nach Textlänge, Benno stellt sich vor, Besichtigung ohne Auto-Wechsel/-Ende.

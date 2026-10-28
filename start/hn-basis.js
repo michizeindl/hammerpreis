@@ -198,7 +198,7 @@
     st.setProperty('--rl', ring(links).toFixed(1) + 'px'); st.setProperty('--rr', ring(rechts).toFixed(1) + 'px');
     return { oben: gerade.oben, unten, links: gerade.links, rechts: gerade.rechts, ringOben: oben, ringLinks: links, ringRechts: rechts, f, kx, kxe, rt };
   }
-  const KNOPF_ANIM = /^(hnKnopfRein|hnKnopfHuepf|hnKnopfRing|knopfRein|knopfHuepf|knopfRing)$/;
+  const KNOPF_ANIM = /^(hnKnopfRein|hnKnopfHuepf|hnKnopfRing|hnKnopfZurueck|knopfRein|knopfHuepf|knopfRing)$/;
   const knopfAnim = ev => { if (KNOPF_ANIM.test(ev.animationName)) knopfPlatz(ev.target); };
   document.addEventListener('animationstart', knopfAnim, true);
   document.addEventListener('animationiteration', knopfAnim, true);

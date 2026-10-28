@@ -51,7 +51,7 @@
     if (z && z.closest && z.closest('button, a, input, select, textarea, label, [data-aktion], [role="button"]')) return;   // traf etwas anderes Tippbares
     for (const b of huepfer) {
       if (!b.isConnected) { huepfer.delete(b); continue; }
-      if (b.disabled || b.classList.contains('wartet') || b.closest('[inert]') || !b.offsetParent) continue;
+      if (b.disabled || b.classList.contains('wartet') || b.closest('[inert], .hn-verdeckt') || !b.offsetParent) continue;
       if (drin(ruhelage(b), ev.clientX, ev.clientY, 0)) { b._hnDruck(ev); return; }
     }
   }, true);
@@ -81,12 +81,59 @@
   // tippbar (disabled + .wartet), dann Plopp (CSS). Testhilfe #tempo=2 halbiert die Wartezeit. Zuschlag wartet nie.
   const tempoM = /[#&]tempo=([\d.]+)/.exec(location.hash);
   const WARTEN = 1.6 / (tempoM && +tempoM[1] > 0 ? +tempoM[1] : 1);
+  // v14: die Wartezeit läuft nur, solange der Knopf nicht verdeckt ist (siehe „Rote Knöpfe hinter Einblendungen“ unten) –
+  // ein Knopf, der hinter einer Einblendung entsteht, beginnt erst nach dem Schließen zu zählen.
   function knopfWarten(b, sek) {
     const s = sek == null ? WARTEN : sek;
     if (!(s > 0)) return 0;
-    b.disabled = true; b.classList.add('wartet');
-    setTimeout(() => { if (!b.isConnected) return; b.classList.remove('wartet'); b.disabled = false; }, s * 1000);
+    b.disabled = true; b.classList.add('wartet'); b.classList.remove('hn-zurueck');
+    b._hnRest = s;
+    if (!b.closest('.hn-verdeckt')) wartenLaufen(b);
     return s;
+  }
+  function wartenLaufen(b) {
+    clearTimeout(b._hnWT);
+    const s = b._hnRest > 0 ? b._hnRest : 0;
+    b._hnBis = performance.now() + s * 1000;
+    b._hnWT = setTimeout(() => { b._hnWT = 0; b._hnRest = 0; if (!b.isConnected) return; b.classList.remove('wartet'); b.disabled = false; }, s * 1000);
+  }
+
+  // ---------- Rote Knöpfe hinter Einblendungen (MZ, 28.10.2026, v14) ----------
+  // „Knopf 2 soll erst erscheinen, wenn Knopf 1 geklickt wurde“: Solange eine Einblendung (oder die Rückfrage) offen ist, sind
+  // die roten Knöpfe dahinter unsichtbar (.hn-verdeckt am Behälter: visibility hidden, Animationen aus – Lage und Layout
+  // bleiben, nichts verschiebt sich). Eine laufende Wartezeit hält an (Rest gemerkt).
+  // Beim Schließen (erst wenn keine weitere Einblendung folgt):
+  //  - Einblendung, die einen Schritt eröffnet (Tagesauftrag, Zwischenscreen, Markt-Meldung, Warnung, Hinweis-Screen):
+  //    rote Knöpfe der Bühne warten die volle Wartezeit ab dem Schließen, dann Gummi-Hüpfer-Plopp (Zuschlag: nur Plopp, ohne Wartezeit).
+  //  - selbst geöffnet (Preisspiegel, Mappe) und Rückfrage: Knopf sofort wieder da (kurzes Einblenden .hn-zurueck); war er noch
+  //    in der Wartezeit, läuft deren Rest weiter.
+  const ROT = '.hn-kn.haupt, .hn-zuschlag';
+  function verdecken(w) {
+    if (w.classList.contains('hn-verdeckt')) return;
+    w.classList.add('hn-verdeckt');
+    w.querySelectorAll(ROT).forEach(b => {
+      b.classList.remove('hn-zurueck');
+      if (b._hnWT) { clearTimeout(b._hnWT); b._hnWT = 0; b._hnRest = Math.max(0, (b._hnBis - performance.now()) / 1000); }
+    });
+  }
+  function aufdecken(w, neu) {
+    if (!w.classList.contains('hn-verdeckt')) return;
+    w.querySelectorAll(ROT).forEach(b => {
+      if (b.closest('.weg')) { b.style.visibility = 'hidden'; return; }   // alte Tafel, die gerade ausgeblendet wird: Knopf bleibt weg
+      const wartet = b.classList.contains('wartet');
+      if (neu && b.matches('.hn-kn.haupt') && (wartet || !b.disabled)) { b._hnRest = WARTEN; b.disabled = true; b.classList.add('wartet'); wartenLaufen(b); }
+      else if (wartet) wartenLaufen(b);
+      else if (!neu) b.classList.add('hn-zurueck');
+    });
+    w.classList.remove('hn-verdeckt');
+  }
+  // Zustand aus den offenen Ebenen: Einblendung verdeckt Bühne/Start/Ende, Rückfrage zusätzlich die Einblendung.
+  // neu = die gerade geschlossene Einblendung hat einen Schritt eröffnet (nur für die Bühne).
+  function deckel(neu) {
+    const e = !einbl.hidden, f = !frage.hidden;
+    if (e || f) verdecken(buehne); else aufdecken(buehne, !!neu);
+    [start, ende].forEach(w => { if ((e || f) && !w.hidden) verdecken(w); else if (!(e || f)) aufdecken(w, false); });
+    if (f) verdecken(einbl); else aufdecken(einbl, false);
   }
 
   let knoepfe = {};
@@ -296,8 +343,15 @@
     einbl.innerHTML = `<div class="hn-einbl-karte ${o.klasse || ''}">${html}${o.knopf ? `<button class="hn-kn haupt" type="button">${esc(o.knopf)}</button>` : ''}</div>`;
     einbl.hidden = false;
     sperren(true);
+    deckel();   // v14: rote Knöpfe dahinter unsichtbar
     einblWeiter = o.weiter || null;
-    const zu = () => { if (einbl.hidden) return; einbl.hidden = true; einbl.innerHTML = ''; sperren(false); const w = einblWeiter; einblWeiter = null; if (w) w(); };
+    // v14: aufgedeckt wird erst, wenn danach keine weitere Einblendung folgt (Tagesauftrag → Zwischenscreen 1 → Anruf)
+    const zu = () => {
+      if (einbl.hidden) return;
+      einbl.hidden = true; einbl.innerHTML = ''; sperren(false);
+      const w = einblWeiter; einblWeiter = null;
+      try { if (w) w(); } finally { if (einbl.hidden) deckel(!o.sofort); }
+    };
     const k = einbl.querySelector('.hn-kn');
     if (k) tippen(k, zu);
     const gewartet = k && !o.sofort ? knopfWarten(k) : 0;   // Preisspiegel/Mappe (sofort): ohne Wartezeit
@@ -333,12 +387,14 @@
       <button class="hn-kn haupt" type="button" data-rf="weiter">${esc(RF.weiter)}</button>
       <button class="hn-kn neben" type="button" data-rf="beenden">${esc(RF.beenden)}</button></div>`;
     frage.hidden = false;
+    deckel();   // v14: auch die roten Knöpfe hinter der Rückfrage (Tafel, Einblendung) unsichtbar
     const ab = performance.now() + 350;
     const taste = ev => { if (ev.key === 'Escape') { ev.preventDefault(); schliessen(false); } };
     function schliessen(ja) {
       if (frage.hidden) return;
       frage.hidden = true; frage.innerHTML = '';
       removeEventListener('keydown', taste, true);
+      if (!ja) deckel(false);   // Weiterspielen: Knöpfe sofort wieder da
       if (ja) o.beenden(); else if (o.weiter) o.weiter();
     }
     addEventListener('keydown', taste, true);
